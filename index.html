@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Tracking with AR.js</title>
+    <title>Surface Tracking with AR.js</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
@@ -16,24 +16,36 @@
         </a-assets>
 
         <!-- Camera setup for AR.js -->
-        <a-camera gps-camera rotation-reader></a-camera>
+        <a-camera arjs-hit-test></a-camera>
 
-        <!-- 3D model entity that will be placed on the surface -->
+        <!-- 3D model entity that will be placed on the detected surface -->
         <a-entity 
-            gps-entity-place="latitude: your-latitude; longitude: your-longitude;"
+            arjs-anchor="hitTestingEnabled: true;"
             gltf-model="#model" 
             scale="0.5 0.5 0.5"
-            rotation="0 180 0">
+            rotation="0 180 0"
+            visible="false"
+            position="0 0 0">
         </a-entity>
     </a-scene>
 
     <!-- AR.js Script -->
     <script>
-        AFRAME.registerComponent('rotation-reader', {
-            tick: function () {
-                this.el.object3D.rotation.y += 0.01;
+        // Show the model when a surface is detected
+        AFRAME.registerComponent('surface-detection', {
+            init: function () {
+                let model = this.el;
+                model.addEventListener('arjs-found', function () {
+                    model.setAttribute('visible', true);
+                });
+                model.addEventListener('arjs-lost', function () {
+                    model.setAttribute('visible', false);
+                });
             }
         });
+
+        // Apply the surface detection component to the model
+        document.querySelector('a-entity[gltf-model]').setAttribute('surface-detection', '');
     </script>
 </body>
 </html>
