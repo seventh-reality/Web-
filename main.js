@@ -1,6 +1,6 @@
-import {loadGLTF} from './libs/faceapi/loader.js';
-import * as THREE from './libs/faceapi/three.js-r132/build/three.module.js';
-import {ARButton} from './libs/faceapi/three.js-r132/examples/jsm/webxr/ARButton.js';
+import {loadGLTF} from './loader.js';
+import * as THREE from './three.module.js';
+import {ARButton} from './ARButton.js';
 
 const normalizeModel = (obj, height) => {
   // scale it according to height
