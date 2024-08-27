@@ -7,8 +7,25 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
+    <style>
+        #toggle-button {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
+    <button id="toggle-button">Toggle Model</button>
+    
     <!-- A-Frame Scene with AR.js -->
     <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
         <a-assets>
@@ -19,33 +36,76 @@
         <!-- Camera setup for AR.js -->
         <a-camera arjs-hit-test></a-camera>
 
+        <!-- Reticle for surface detection -->
+        <a-entity id="reticle" 
+                  geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
+                  material="color: red; shader: flat;" 
+                  position="0 0 -1" 
+                  rotation="-90 0 0" 
+                  visible="false">
+        </a-entity>
+
         <!-- 3D model entity that will be placed on the detected surface -->
-        <a-entity 
-            arjs-anchor="hitTestingEnabled: true;"
-            gltf-model="#model" 
-            scale="0.5 0.5 0.5"
-            rotation="0 180 0"
-            position="0 0 0"
-            visible="false">
+        <a-entity id="model-entity" 
+                  gltf-model="#model" 
+                  scale="0.5 0.5 0.5" 
+                  rotation="0 180 0" 
+                  position="0 0 0" 
+                  visible="false">
         </a-entity>
     </a-scene>
 
     <script>
-        // Register a custom component to control visibility based on hit test results
-        AFRAME.registerComponent('surface-detection', {
-            init: function () {
-                const model = this.el;
-                model.addEventListener('arjs-hit-found', function () {
-                    model.setAttribute('visible', true);
-                });
-                model.addEventListener('arjs-hit-lost', function () {
-                    model.setAttribute('visible', false);
-                });
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const reticle = document.getElementById('reticle');
+            const modelEntity = document.getElementById('model-entity');
+            const toggleButton = document.getElementById('toggle-button');
+            let modelVisible = false;
 
-        // Apply the surface detection component to the model
-        document.querySelector('a-entity[gltf-model]').setAttribute('surface-detection', '');
+            // Toggle model visibility using the button
+            toggleButton.addEventListener('click', () => {
+                modelVisible = !modelVisible;
+                modelEntity.setAttribute('visible', modelVisible);
+            });
+
+            // Register a custom component to control the reticle based on hit test results
+            AFRAME.registerComponent('surface-detection', {
+                init: function () {
+                    const model = this.el;
+
+                    model.addEventListener('arjs-hit-found', function () {
+                        reticle.setAttribute('visible', true);
+                    });
+
+                    model.addEventListener('arjs-hit-lost', function () {
+                        reticle.setAttribute('visible', false);
+                    });
+                }
+            });
+
+            // Apply the surface detection component to the model
+            modelEntity.setAttribute('surface-detection', '');
+
+            // Listen for clicks on the reticle to place the model
+            reticle.addEventListener('click', () => {
+                if (reticle.getAttribute('visible') === true) {
+                    const position = reticle.getAttribute('position');
+                    modelEntity.setAttribute('position', position);
+                    modelEntity.setAttribute('visible', true);
+                    modelVisible = true;
+                }
+            });
+
+            // Ensure that the reticle can be clicked in AR mode
+            document.querySelector('a-scene').addEventListener('click', (event) => {
+                if (reticle.getAttribute('visible') === true && !modelVisible) {
+                    const position = reticle.getAttribute('position');
+                    modelEntity.setAttribute('position', position);
+                    modelEntity.setAttribute('visible', true);
+                    modelVisible = true;
+                }
+            });
+        });
     </script>
 </body>
 </html>
