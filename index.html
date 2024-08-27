@@ -1,20 +1,39 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-
-    <!-- USE A MOBILE APPROPRIATE VIEWPORT SETTING SO THE UI APPEARS THE RIGHT SIZE -->
-    <meta name="viewport" content="width=device-width,user-scalable=no,minimal-ui" />
-
-    <title>Zappar for ThreeJS</title>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'></script><script src='https://libs.zappar.com/zappar-threejs/2.0.6/zappar-threejs.js'></script><link rel='stylesheet' type='text/css' href='style.css'>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Tracking with AR.js</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
+<body style="margin: 0; overflow: hidden;">
+    <!-- A-Frame Scene with AR.js -->
+    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+        <a-assets>
+            <!-- Load a 3D model -->
+            <a-asset-item id="model" src="Steerad.glb"></a-asset-item>
+        </a-assets>
 
-<body>
-<script type="module" src="index.js"></script>
-    <div id="zappar-placement-ui">Tap here to place the object</div>
+        <!-- Camera setup for AR.js -->
+        <a-camera gps-camera rotation-reader></a-camera>
+
+        <!-- 3D model entity that will be placed on the surface -->
+        <a-entity 
+            gps-entity-place="latitude: your-latitude; longitude: your-longitude;"
+            gltf-model="#model" 
+            scale="0.5 0.5 0.5"
+            rotation="0 180 0">
+        </a-entity>
+    </a-scene>
+
+    <!-- AR.js Script -->
+    <script>
+        AFRAME.registerComponent('rotation-reader', {
+            tick: function () {
+                this.el.object3D.rotation.y += 0.01;
+            }
+        });
+    </script>
 </body>
-
 </html>
