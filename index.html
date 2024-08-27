@@ -17,15 +17,35 @@
         </a-assets>
 
         <!-- Camera setup for AR.js -->
-        <a-camera></a-camera>
+        <a-camera arjs-hit-test></a-camera>
 
-        <!-- 3D model entity -->
+        <!-- 3D model entity that will be placed on the detected surface -->
         <a-entity 
+            arjs-anchor="hitTestingEnabled: true;"
             gltf-model="#model" 
             scale="0.5 0.5 0.5"
             rotation="0 180 0"
-            position="0 0 0">
+            position="0 0 0"
+            visible="false">
         </a-entity>
     </a-scene>
+
+    <script>
+        // Register a custom component to control visibility based on hit test results
+        AFRAME.registerComponent('surface-detection', {
+            init: function () {
+                const model = this.el;
+                model.addEventListener('arjs-hit-found', function () {
+                    model.setAttribute('visible', true);
+                });
+                model.addEventListener('arjs-hit-lost', function () {
+                    model.setAttribute('visible', false);
+                });
+            }
+        });
+
+        // Apply the surface detection component to the model
+        document.querySelector('a-entity[gltf-model]').setAttribute('surface-detection', '');
+    </script>
 </body>
 </html>
