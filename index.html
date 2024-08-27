@@ -1,29 +1,41 @@
-<!-- from https://medium.com/swlh/build-your-location-based-augmented-reality-web-app-a841956eed2c -->
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Multi-location AR</title>
-    <script src='https://aframe.io/releases/1.0.4/aframe.min.js'></script>
-    <!-- we import arjs version without NFT but with marker 
-        + location based support -->
-    <script src="https://smartlab.tmit.bme.hu:4443/AR.js/aframe/build/aframe-ar.js"></script>
-    <!-- for animating 3D models -->
-    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
-    <!-- three.js context -->
-    <script>
-        THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
-    </script>
+    <title>ARToolKit Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/artoolkit/5.3.2/artoolkit.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/artoolkit/5.3.2/artoolkit.api.min.js"></script>
 </head>
+<body>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script>
+        var video = document.getElementById('video');
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            video.srcObject = stream;
+        });
 
-<body style='margin: 0; overflow: hidden;'>
-    <a-scene embedded arjs>
-        <!-- The scale attribute is used because that model is pretty big -->
-        <!-- and the custom rotation will make the model ‘look’ towards the user. -->
-        <!-- The animation-mixer attribute tells the model to use its built-in animation. -->
-        <a-entity gltf-model="Steerad.glb" rotation="0 180 0" scale="0.15 0.15 0.15" gps-entity-place="longitude: 12.489820; latitude: 41.892590;" animation-mixer/>
+        var arToolkitSource = new THREEx.ArToolkitSource({ sourceType: 'video' });
+        arToolkitSource.init(function onReady() {
+            arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '../data/data/camera_para.dat',
+                detectionMode: 'mono'
+            });
+            arToolkitContext.init(function onCompleted() {
+                console.log('ARToolKit initialized');
+            });
+        });
 
-        <a-camera gps-camera rotation-reader></a-camera>
-    </a-scene>
+        function animate() {
+            requestAnimationFrame(animate);
+            if (arToolkitSource.ready) {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        animate();
+    </script>
 </body>
+</html>
