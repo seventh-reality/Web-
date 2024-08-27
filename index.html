@@ -15,8 +15,15 @@
             <a-asset-item id="model" src="Steerad.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Camera setup for AR.js -->
-        <a-camera arjs-hit-test></a-camera>
+        <!-- Camera setup for AR.js with fixed position and adjusted field of view -->
+        <a-camera 
+            arjs-hit-test
+            position="0 1.6 0" 
+            fov="70"
+            look-controls="enabled: false"
+            wasd-controls="enabled: false"
+            rotation-reader>
+        </a-camera>
 
         <!-- 3D model entity that will be placed on the detected surface -->
         <a-entity 
@@ -46,6 +53,13 @@
 
         // Apply the surface detection component to the model
         document.querySelector('a-entity[gltf-model]').setAttribute('surface-detection', '');
+
+        // Disable camera rotation and movement controls
+        AFRAME.registerComponent('rotation-reader', {
+            tick: function () {
+                this.el.object3D.rotation.set(0, 0, 0);
+            }
+        });
     </script>
 </body>
 </html>
