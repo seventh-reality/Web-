@@ -3,42 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR AR Example</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.116.1/examples/jsm/webxr/VRButton.js"></script>
+    <title>AR.js with three.js on iOS Safari</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
 </head>
-<body>
-    <script>
-        let scene, camera, renderer;
+<body style="margin: 0; overflow: hidden;">
+    <!-- A-Frame Scene with AR.js -->
+    <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false;'>
+        <a-assets>
+            <!-- Load a 3D model -->
+            <a-asset-item id="model" src="Steerad.glb"></a-asset-item>
+        </a-assets>
 
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        <!-- Camera setup for AR.js -->
+        <a-camera></a-camera>
 
-            renderer = new THREE.WebGLRenderer({ alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            document.body.appendChild(renderer.domElement);
-
-            document.body.appendChild(VRButton.createButton(renderer));
-
-            const geometry = new THREE.BoxGeometry();
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-
-            camera.position.z = 5;
-
-            animate();
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(() => {
-                renderer.render(scene, camera);
-            });
-        }
-
-        init();
-    </script>
+        <!-- 3D model entity -->
+        <a-entity 
+            gltf-model="#model" 
+            scale="0.5 0.5 0.5"
+            rotation="0 180 0"
+            position="0 0 0">
+        </a-entity>
+    </a-scene>
 </body>
 </html>
