@@ -1,4 +1,4 @@
-import {loadGLTF} from "./libs/faceapi/loader.js";
+import {loadGLTF} from './libs/faceapi/loader.js';
 import * as THREE from './libs/faceapi/three.js-r132/build/three.module.js';
 import {ARButton} from './libs/faceapi/three.js-r132/examples/jsm/webxr/ARButton.js';
 
