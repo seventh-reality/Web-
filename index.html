@@ -1,45 +1,29 @@
+<!-- from https://medium.com/swlh/build-your-location-based-augmented-reality-web-app-a841956eed2c -->
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Three.js Example</title>
-    <style>
-      body { margin: 0; }
-      canvas { display: block; }
-    </style>
-  </head>
-  <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Multi-location AR</title>
+    <script src='https://aframe.io/releases/1.0.4/aframe.min.js'></script>
+    <!-- we import arjs version without NFT but with marker 
+        + location based support -->
+    <script src="https://smartlab.tmit.bme.hu:4443/AR.js/aframe/build/aframe-ar.js"></script>
+    <!-- for animating 3D models -->
+    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+    <!-- three.js context -->
     <script>
-      // Create the scene
-      const scene = new THREE.Scene();
-
-      // Create a camera
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-
-      // Create a renderer
-      const renderer = new THREE.WebGLRenderer();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      // Create a cube
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-
-      // Animation loop
-      function animate() {
-        requestAnimationFrame(animate);
-
-        // Rotate the cube
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-
-        renderer.render(scene, camera);
-      }
-
-      animate();
+        THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
     </script>
-  </body>
-</html>
+</head>
+
+<body style='margin: 0; overflow: hidden;'>
+    <a-scene embedded arjs>
+        <!-- The scale attribute is used because that model is pretty big -->
+        <!-- and the custom rotation will make the model ‘look’ towards the user. -->
+        <!-- The animation-mixer attribute tells the model to use its built-in animation. -->
+        <a-entity gltf-model="Steerad.glb" rotation="0 180 0" scale="0.15 0.15 0.15" gps-entity-place="longitude: 12.489820; latitude: 41.892590;" animation-mixer/>
+
+        <a-camera gps-camera rotation-reader></a-camera>
+    </a-scene>
+</body>
