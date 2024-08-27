@@ -1,28 +1,54 @@
-# Zappar for ThreeJS
-## Standalone Bootstrap Project
+### Introduction to Web AR development
 
-In this project you'll find the following files that get you up and running with Zappar for ThreeJS.
-- *index.html*: contains the basic structure of you page and any necessary HTML UI elements
-- *index.js*: contains the code the sets up your ThreeJS scene and AR experience
-- *style.css*: contains the CSS for your page
+#### Development Environment Setup
+* [Web Server for Chrome](https://chromewebstore.google.com/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb)
+* [ngrok](https://ngrok.com/)
 
-Head to the NPM package page for more information on how to build best-in-class AR experiences: [Zappar for ThreeJS](https://www.npmjs.com/package/@zappar/zappar-threejs) (@zappar/zappar-threejs)
-
-## Preview
-Scan the QR code below using your native camera app or QR code reader to view the example:
-​
-![Preview QR Code"](preview-qr-code.png)
-
-### Local Preview and Testing
-
-Due to browser restrictions surrounding use of the camera, you must use HTTPS to view or preview your site, even if doing so locally from your computer. If you're using `webpack`, consider using `webpack-dev-server` which has an `https` option to enable this.
-
-Alternatively you can use the [ZapWorks command-line tool](https://www.npmjs.com/package/@zappar/zapworks-cli) to serve a folder over HTTPS for access on your local computer, like this:
+**Create an URL accessible by any devices with internet connection**
 ```
-zapworks serve .
+// 8887 - default port
+
+./ngrok http 8887
 ```
 
-The command also lets you serve the folder for access by other devices on your local network, like this:
+* [Remote JavaScript Debuggin](https://remotejs.com/)
+
+#### Course Materials
+- All the examples used in the course.
+    - libs
+        - contains all the the libraries needed
+    - assets
+        - contains all the assets, including 3D models, images, videos, etc...
+    - lectures
+        - contains all the completed source code at the end of each lecture
+    - lectures-start
+        - contains the source code at the beginning of each lecture
+
+#### 3D Rendering Basic
+- WebGL
+    - is a javascript api for rendering 3D graphics on browsers
+    - is a cross-platform web standard so basically all major browsers support it
+    - webgl code is very difficult to read and write
+        - so people build more user-friendly libraries on top
+            - three.js is one of these libraries
+
+* [three.js](https://threejs.org/)
+* [Installation](https://threejs.org/docs/index.html#manual/en/introduction/Installation)
+
+```js
+import * as THREE from 'three';
 ```
-zapworks serve . --lan
-```
+
+#### Tracking and AR
+- Types of AR
+    - barcode-like images
+        - are images that has a predefined patterns
+    - natural images
+        - area images that can be anything typical image tracking ar applications include ar product packaging maganizes
+    - face tracking
+        - in face tracking augumented objects are attached to human face (facebook, instagram)
+    - world tracking ar
+        - people sometimes refer to it as markerless ar
+        - the augmented content can be placed anywhere not restricted to particular image, face or physical objects
+    - location based AR?
+        - what people usually mean by that is that ar content is attached to certain geographical location like latitude and longitude
