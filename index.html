@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markerless AR SDK</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets/dist/aframe.js"></script>
     <script src="ar-sdk.js"></script>
 </head>
 <body>
     <div id="ar-container"></div>
+    <button id="start-ar">Start AR</button> <!-- Start AR button -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const sdk = new ARSDK();
-            sdk.initialize(document.getElementById('ar-container'));
+            const startButton = document.getElementById('start-ar');
+            
+            startButton.addEventListener('click', () => {
+                // Initialize the AR SDK here
+                ARSDK.initialize();
+            });
         });
     </script>
 </body>
