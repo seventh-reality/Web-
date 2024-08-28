@@ -1,146 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
-    crossorigin="anonymous">
-    <link type="text/css" rel="stylesheet" href="misc/bootstrap.css"/>
-    <link type="text/css" rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8th Wall Marker-less AR</title>
+  <script src="https://apps.8thwall.com/xrweb?appKey=YOUR_APP_KEY"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
+  <style>
+      body { margin: 0; overflow: hidden; }
+  </style>
 </head>
-<body style='margin : 0px;'>
+<body>
+  <script>
+    // Wait for 8th Wall to be ready
+    XR8.addCameraPipelineModules([ // Add camera pipeline modules.
+      XR8.GlTextureRenderer.pipelineModule(), // Draws the camera feed.
+      XR8.Threejs.pipelineModule(),           // Creates a Three.js AR environment.
+      XR8.XrController.pipelineModule(),      // Enables SLAM tracking.
+      XRExtras.AlmostThere.pipelineModule(),  // Detects unsupported browsers and prompts the user to upgrade if needed.
+      XRExtras.RuntimeError.pipelineModule(), // Shows an error image if the camera fails to start.
+    ])
 
-    <div id="overlay" class="containter-fluid">
-       
-        <div id="title" class="row" >
-            <div class="col">
-                <div class="row justify-content-center">
-                    <img id="logoImg"  src="misc/imgs/logo.png">
-                </div>
-                <div class="row text-right">
-                    <p class="col">Alpha 0.1</p>
-                </div>
-                
-            </div>
-           
-        </div>
-        <div id="initialPage"  class="row" >
-            
-                <div class="col text-center" >
-                
-                    <div id="img1" class="row">
-                        <a id="editorLink" href="editor/editor.html" >Editor</a>
-                        <img id="img1" src="misc/imgs/gifEditor.gif">
-                    </div>
-                   
-                </div>
-            
-                <div class="col text-center">
-                    <a href="viewer/viewer2.html" >Viewer</a>
-                    <div id="img2"></div>
-                </div>
-        </div>
+    // Start the 8th Wall engine
+    XR8.run({
+      canvas: document.querySelector('canvas'),
+      allowedDevices: XR8.Device.Any,  // Allow AR on both desktop and mobile
+      showStats: false                 // Do not show performance stats on screen
+    })
 
+    // Three.js setup
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000)
+    const renderer = new THREE.WebGLRenderer({alpha: true})
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    document.body.appendChild(renderer.domElement)
 
-        <div id="content" class="row">
-            <div id="textIntro" class="col text-center">
-                <p>ArCad is a keyframe <span style="color: green">Editor</span> and a <span style="color: green">AR Viewer</span> for your 3D Models. <br>Import, edit keyframes and visualize.</p>
-                <img src="misc/imgs/content.png">
-            </div>
-        </div>
+    // Add lighting
+    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1)
+    scene.add(light)
 
-        <div id="learn" class="row">
-            <div class="col">
-                <div id="learnTitle" class="row justify-content-center">
-                    <p>Learn how to use it</p>
-                </div>
-                <div id="learnOpt" class="row">
-                    <div id="learEditor" class="col text-right">Editor</div>
-                    <div id="learViewer" class="col">Viewer</div>
-                </div>
-                <div id="learnContent"class="row">
-                    <div id="learnMenus" class="col">
-                        <div id="editorToolbar" class="col text-center">
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT dropdown-toggle" data-toggle="tooltip" data-placement="right" title="Controls" onclick="showControls()">
-                                    <img id="imgBtLoad" class="imgBT" src="misc/imgs/move.png"/>
-                                </button>
-                            </div>
+    // Load a 3D model (replace with your own model path)
+    const loader = new THREE.GLTFLoader()
+    loader.load('Steerad.glb', function(gltf) {
+      const model = gltf.scene
+      model.scale.set(0.5, 0.5, 0.5)  // Scale the model
+      model.position.set(0, 0, -3)    // Position it 3 meters in front of the camera
+      scene.add(model)
+    })
 
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT row" data-toggle="tooltip" data-placement="right" title="Keyframe" onclick="showKeyframe()">
-                                    <img id="imgBtPreview"  class="imgBT" src="misc/imgs/keyframe.png">
-                                </button>
-                            </div>
-
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT row" onclick="preview()" data-toggle="tooltip" data-placement="right" title="Preview"> 
-                                    <img id="imgBtPreview"  class="imgBT" src="misc/imgs/preview.png">
-                                </button>
-                            </div>
-
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT dropdown-toggle"  data-toggle="tooltip" data-placement="right" title="Export">
-                                    <img id="imgBtLoad" class="imgBT" src="misc/imgs/export.png"/>
-                                </button>
-                            </div>
-
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT dropdown-toggle" data-toggle="tooltip" data-placement="right" title="Load">
-                                    <img id="imgBtLoad" class="imgBT" src="misc/imgs/load.png"/>
-                                </button>
-                            </div>
-
-                            <div class="row justify-content-center">
-                                <button type="button" class="btn marginBT row" onclick="goToViewer()" data-toggle="tooltip" data-placement="right" title="Viewer"> 
-                                    <img id="imgBtPreview"  class="imgBT" src="misc/imgs/smartphone.png">
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div id="demonstrate"class="col">
-                        <div id="demonstrateEditor" class="text-center">
-                            <p id="textLearn"></p>
-                            <img id="imgControls" >      
-                            <img id="auxImg" >  
-                            <div id="grid">
-                                <img src="misc/imgs/grid.png">
-                            </div>
-                           
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="footer" class="row jumbotron jumbotron-fluid">
-        <div class="container">
-            <div class="row ">
-                <div class="col text-center">
-                    <p>More about and more projects at:</p>
-                    <a href="https://github.com/Carnaux" class="fab fa-github" style="font-size: 80px; color: black"></a>
-                    <p id="copyright">Daniel Fernandes 2019</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script type="text/javascript" src="misc/jquery.js"></script>
-    <script type="text/javascript" src="misc/popper.js"></script>
-    <script type="text/javascript" src="misc/bootstrap.js"></script>
-    <script type="text/javascript" src="index.js"></script>
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
-    </script>
+    // Handle frame updates
+    function animate() {
+      renderer.render(scene, camera)
+      requestAnimationFrame(animate)
+    }
+    animate()
+  </script>
 </body>
 </html>
