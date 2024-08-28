@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom AR SDK</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <div id="ar-container"></div>
-    <button id="scene1-btn">Load Scene 1</button>
-    <button id="scene2-btn">Load Scene 2</button>
+<body>
+    <button id="start-ar">Start AR</button>
 
+    <!-- Your script should be here at the end of the body -->
     <script>
         class CustomARSDK {
             constructor() {
@@ -22,6 +20,7 @@
                 this.hitTestSource = null;
                 this.models = {};
                 this.currentScene = null;
+                this.sceneButtons = {};
             }
 
             initialize(container) {
@@ -40,18 +39,25 @@
             }
 
             setupWebXR() {
-                if (navigator.xr) {
-                    document.getElementById('start-ar').addEventListener('click', () => {
-                        navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then(session => {
-                            this.arSession = session;
-                            this.setupHitTestSource();
-                            this.renderer.xr.enabled = true;
-                            this.renderer.xr.setSession(session);
-                            this.renderer.setAnimationLoop(() => this.render());
-                        });
+                const startButton = document.getElementById('start-ar');
+                if (startButton) {
+                    startButton.addEventListener('click', () => {
+                        if (navigator.xr) {
+                            navigator.xr.requestSession('immersive-ar', {
+                                requiredFeatures: ['hit-test']
+                            }).then(session => {
+                                this.arSession = session;
+                                this.setupHitTestSource();
+                                this.renderer.xr.enabled = true;
+                                this.renderer.xr.setSession(session);
+                                this.renderer.setAnimationLoop(() => this.render());
+                            });
+                        } else {
+                            console.error('WebXR not supported');
+                        }
                     });
                 } else {
-                    console.error('WebXR not supported');
+                    console.error('Start AR button not found');
                 }
             }
 
@@ -64,19 +70,31 @@
             }
 
             loadScenes() {
-                this.loadScene('scene1', 'Steerad.glb');
-                this.loadScene('scene2', 'Steerad.glb');
+                // Example scenes setup
+                this.loadScene('scene1', 'Steerad.glb', 'Scene 1');
+                this.loadScene('scene2', 'Steerad.glb', 'Scene 2');
             }
 
-            loadScene(id, modelUrl) {
+            loadScene(id, modelUrl, buttonText) {
+                const scene = new THREE.Scene();
                 const loader = new THREE.GLTFLoader();
                 loader.load(modelUrl, gltf => {
                     const model = gltf.scene;
                     model.scale.set(1, 1, 1);
+                    scene.add(model);
                     this.models[id] = model;
+                    this.createSceneButton(id, buttonText);
                 }, undefined, error => {
                     console.error('An error occurred while loading the model', error);
                 });
+            }
+
+            createSceneButton(id, text) {
+                const button = document.createElement('button');
+                button.textContent = text;
+                button.onclick = () => this.switchScene(id);
+                document.body.appendChild(button);
+                this.sceneButtons[id] = button;
             }
 
             switchScene(id) {
@@ -88,9 +106,6 @@
             }
 
             setupEventListeners() {
-                document.getElementById('scene1-btn').addEventListener('click', () => this.switchScene('scene1'));
-                document.getElementById('scene2-btn').addEventListener('click', () => this.switchScene('scene2'));
-                
                 window.addEventListener('resize', () => {
                     this.renderer.setSize(window.innerWidth, window.innerHeight);
                     this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -113,9 +128,10 @@
             }
         }
 
-        // Initialize the SDK
-        const arSDK = new CustomARSDK();
-        arSDK.initialize(document.getElementById('ar-container'));
+        document.addEventListener('DOMContentLoaded', () => {
+            const arSDK = new CustomARSDK();
+            arSDK.initialize(document.body);
+        });
     </script>
 </body>
 </html>
