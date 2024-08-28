@@ -12,59 +12,66 @@
     <div id="ar-container"></div>
 
     <script>
-        // Initialize Lightship WebAR SDK
-        LightshipWebAR.create({
-            clientID: 'ei6Og64UeJ7y243HNfIqka6GUJxDFRWJlnXI6GeDUW0Aguh1gB44z1CeGJaU8GPnjVQXz1',  // Replace with your Lightship client ID
-            container: document.getElementById('ar-container'),
-            onReady: onReady
-        });
-
-        function onReady(sdk) {
-            // Set up Three.js scene
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            // Load the .glb model
-            const loader = new THREE.GLTFLoader();
-            let model;
-            loader.load('Steerad.glb', (gltf) => {
-                model = gltf.scene;
-                model.scale.set(1, 1, 1); // Adjust scale as needed
-                model.visible = false; // Initially hide the model until a surface is detected
-                scene.add(model);
-            }, undefined, (error) => {
-                console.error('An error occurred while loading the model', error);
-            });
-
-            camera.position.z = 5;
-
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
-                if (model) {
-                    model.rotation.y += 0.01; // Rotate model for visual effect
-                }
-                renderer.render(scene, camera);
+        window.onload = function() {
+            if (typeof LightshipWebAR === 'undefined') {
+                console.error('LightshipWebAR is not defined. Make sure the SDK script is loaded properly.');
+                return;
             }
-            animate();
 
-            // Handle AR tracking and placing objects
-            sdk.onFrame(({ hitTest }) => {
-                if (hitTest && hitTest.length > 0) {
-                    const hit = hitTest[0];
-                    if (model) {
-                        model.position.set(hit.position.x, hit.position.y, hit.position.z);
-                        model.visible = true; // Show the model when a surface is detected
-                    }
-                }
+            // Initialize Lightship WebAR SDK
+            LightshipWebAR.create({
+                clientID: 'ei6Og64UeJ7y243HNfIqka6GUJxDFRWJlnXI6GeDUW0Aguh1gB44z1CeGJaU8GPnjVQXz1',  // Replace with your Lightship client ID
+                container: document.getElementById('ar-container'),
+                onReady: onReady
             });
 
-            // Start AR session
-            sdk.start();
-        }
+            function onReady(sdk) {
+                // Set up Three.js scene
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                // Load the .glb model
+                const loader = new THREE.GLTFLoader();
+                let model;
+                loader.load('Steerad.glb', (gltf) => {
+                    model = gltf.scene;
+                    model.scale.set(1, 1, 1); // Adjust scale as needed
+                    model.visible = false; // Initially hide the model until a surface is detected
+                    scene.add(model);
+                }, undefined, (error) => {
+                    console.error('An error occurred while loading the model', error);
+                });
+
+                camera.position.z = 5;
+
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    if (model) {
+                        model.rotation.y += 0.01; // Rotate model for visual effect
+                    }
+                    renderer.render(scene, camera);
+                }
+                animate();
+
+                // Handle AR tracking and placing objects
+                sdk.onFrame(({ hitTest }) => {
+                    if (hitTest && hitTest.length > 0) {
+                        const hit = hitTest[0];
+                        if (model) {
+                            model.position.set(hit.position.x, hit.position.y, hit.position.z);
+                            model.visible = true; // Show the model when a surface is detected
+                        }
+                    }
+                });
+
+                // Start AR session
+                sdk.start();
+            }
+        };
     </script>
 </body>
 </html>
