@@ -1,59 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>8th Wall Marker-less AR</title>
-  <script src="https://apps.8thwall.com/xrweb?appKey=YOUR_APP_KEY"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
-  <style>
-      body { margin: 0; overflow: hidden; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niantic Lightship WebAR Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://lightship.dev/sdk/webar/latest.js"></script>
 </head>
-<body>
-  <script>
-    // Wait for 8th Wall to be ready
-    XR8.addCameraPipelineModules([ // Add camera pipeline modules.
-      XR8.GlTextureRenderer.pipelineModule(), // Draws the camera feed.
-      XR8.Threejs.pipelineModule(),           // Creates a Three.js AR environment.
-      XR8.XrController.pipelineModule(),      // Enables SLAM tracking.
-      XRExtras.AlmostThere.pipelineModule(),  // Detects unsupported browsers and prompts the user to upgrade if needed.
-      XRExtras.RuntimeError.pipelineModule(), // Shows an error image if the camera fails to start.
-    ])
+<body style="margin: 0; overflow: hidden;">
+    <div id="ar-container"></div>
 
-    // Start the 8th Wall engine
-    XR8.run({
-      canvas: document.querySelector('canvas'),
-      allowedDevices: XR8.Device.Any,  // Allow AR on both desktop and mobile
-      showStats: false                 // Do not show performance stats on screen
-    })
+    <script>
+        // Initialize Lightship WebAR SDK
+        LightshipWebAR.create({
+            clientID: 'YOUR_CLIENT_ID',  // Replace with your Lightship client ID
+            container: document.getElementById('ar-container'),
+            onReady: onReady
+        });
 
-    // Three.js setup
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000)
-    const renderer = new THREE.WebGLRenderer({alpha: true})
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    document.body.appendChild(renderer.domElement)
+        function onReady(sdk) {
+            // Set up Three.js scene
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-    // Add lighting
-    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1)
-    scene.add(light)
+            // Load the .glb model
+            const loader = new THREE.GLTFLoader();
+            let model;
+            loader.load('Steerad.glb', (gltf) => {
+                model = gltf.scene;
+                model.scale.set(1, 1, 1); // Adjust scale as needed
+                model.visible = false; // Initially hide the model until a surface is detected
+                scene.add(model);
+            }, undefined, (error) => {
+                console.error('An error occurred while loading the model', error);
+            });
 
-    // Load a 3D model (replace with your own model path)
-    const loader = new THREE.GLTFLoader()
-    loader.load('Steerad.glb', function(gltf) {
-      const model = gltf.scene
-      model.scale.set(0.5, 0.5, 0.5)  // Scale the model
-      model.position.set(0, 0, -3)    // Position it 3 meters in front of the camera
-      scene.add(model)
-    })
+            camera.position.z = 5;
 
-    // Handle frame updates
-    function animate() {
-      renderer.render(scene, camera)
-      requestAnimationFrame(animate)
-    }
-    animate()
-  </script>
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                if (model) {
+                    model.rotation.y += 0.01; // Rotate model for visual effect
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle AR tracking and placing objects
+            sdk.onFrame(({ hitTest }) => {
+                if (hitTest && hitTest.length > 0) {
+                    const hit = hitTest[0];
+                    if (model) {
+                        model.position.set(hit.position.x, hit.position.y, hit.position.z);
+                        model.visible = true; // Show the model when a surface is detected
+                    }
+                }
+            });
+
+            // Start AR session
+            sdk.start();
+        }
+    </script>
 </body>
 </html>
