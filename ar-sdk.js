@@ -1,22 +1,7 @@
-class ARSDK {
-    static initialize() {
-        this.setupWebXR();
-    }
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-    static setupWebXR() {
-        if (navigator.xr) {
-            navigator.xr.requestSession('immersive-ar').then((session) => {
-                // Your AR session setup code here
-            }).catch((err) => {
-                console.error('Failed to start AR session', err);
-            });
-        } else {
-            console.error('WebXR not supported');
-        }
-    }
-}
-
-class ARSDK {
+class CustomARSDK {
     constructor() {
         this.scene = null;
         this.camera = null;
@@ -44,18 +29,25 @@ class ARSDK {
     }
 
     setupWebXR() {
-        if (navigator.xr) {
-            navigator.xr.requestSession('immersive-ar', {
-                requiredFeatures: ['hit-test']
-            }).then(session => {
-                this.arSession = session;
-                this.setupHitTestSource();
-                this.renderer.xr.enabled = true;
-                this.renderer.xr.setSession(session);
-                this.renderer.setAnimationLoop(() => this.render());
+        const startButton = document.getElementById('start-ar');
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                if (navigator.xr) {
+                    navigator.xr.requestSession('immersive-ar', {
+                        requiredFeatures: ['hit-test']
+                    }).then(session => {
+                        this.arSession = session;
+                        this.setupHitTestSource();
+                        this.renderer.xr.enabled = true;
+                        this.renderer.xr.setSession(session);
+                        this.renderer.setAnimationLoop(() => this.render());
+                    });
+                } else {
+                    console.error('WebXR not supported');
+                }
             });
         } else {
-            console.error('WebXR not supported');
+            console.error('Start AR button not found');
         }
     }
 
@@ -75,7 +67,7 @@ class ARSDK {
 
     loadScene(id, modelUrl, buttonText) {
         const scene = new THREE.Scene();
-        const loader = new THREE.GLTFLoader();
+        const loader = new GLTFLoader();
         loader.load(modelUrl, gltf => {
             const model = gltf.scene;
             model.scale.set(1, 1, 1);
@@ -125,3 +117,8 @@ class ARSDK {
         this.renderer.render(this.scene, this.camera);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const arSDK = new CustomARSDK();
+    arSDK.initialize(document.body);
+});
