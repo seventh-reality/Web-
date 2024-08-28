@@ -1,81 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niantic Lightship WebAR Example</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://lightship.dev/sdk/webar/latest.js" onload="initializeAR();" onerror="handleSDKError();"></script>
-</head>
-<body style="margin: 0; overflow: hidden;">
-    <div id="ar-container"></div>
+  <!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebAR-CarController</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    
+<script src = "sdk/blippar-webar-sdk-v2.0.1/webar-sdk/webar-sdk-v2.0.1.min.js?license-key=e593c4c4-d263-4d5a-bea4-000c2b7476ae"
+webar-mode="surface-tracking"
+static-camera = "true"
+auto-start="false"
+auto-init="false"
+enable-photo-ui="true"
+render-scene-on-desktop="false"
+show-qr-card-on-desktop="false"
+enable-tracking-on-desktop= "false"
+enable-mirroring-on-desktop= "false"
+hide-reset-button="false"
+auto-marker-detection ="true"
+show-guide-animation-url=""
+rendering-engine="unity"
+logo-src="images/blippar_logo.png"
+logo-height="200px"
+logo-width="200px"
+loading-progress-type="default"
+progress-dot-ring-scale="0.30"
+progress-dot-ring-color="#F7A400"
+progress-ring-scale="0.36"
+progress-ring-color="#F7A400"
+progress-ring-line-width="5"
 
-    <script>
-        function handleSDKError() {
-            console.error('Failed to load Lightship WebAR SDK. Please check the script URL or network connection.');
+alert-border-color=""
+alert-border-width=""
+alert-border-radius=""
+alert-background-color=""
+alert-message-text-color=""
+alert-button-color=""
+alert-button-text-color=""
+alert-button-height=""
+alert-button-border-radius=""
+alert-box-font-size=""
+alert-box-height=""
+alert-box-width=""
+alert-camera-permission-text=""
+alert-camera-permission-button-text=""
+alert-motion-permission-text=""
+alert-motion-permission-button-text=""
+    
+ui-background-color="#FFFFFF"
+ui-portrait-text="This experience is optimized for portrait display"
+ui-text-color="#000000"
+desktop-logo-src="images/blippar_logo.png"
+desktop-logo-width="150px"
+desktop-logo-height="150px"
+issue-img-src="images/test_issue_img.png"
+issue-img-width="116px"
+issue-img-height="116px"
+
+auto-scan-instruction="Find a marker to scan..."
+auto-scan-instruction-detect="Marker detecting..."
+auto-scan-instruction-idle="Shake your phone to start detection"
+auto-scan-instruction-text-style="color: orange;"
+auto-scan-style="Display: block; position: absolute; top: 90%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; width: auto; height: auto; text-alogn: center; "
+auto-scan-style-display="block"
+
+scan-btn-display="block"
+scan-btn-height="100px"
+scan-btn-width="100px"
+scan-btn-img-height="50"
+scan-btn-img-width="50"
+scan-btn-img-src="images/user_scan-btn-image_here.png"
+scan-btn-img-transform="translate(-25, -25)"
+scan-btn-img-x-coordinate="50%"
+scan-btn-img-y-coordinate="50%"
+
+scan-btn-instruction="Tap to scan"
+scan-btn-instruction-style="color: white;"
+scan-btn-progress-bar-color="blue"
+scan-btn-progress-bar-cx-coordinate="50"
+scan-btn-progress-bar-cy-coordinate="50"
+scan-btn-progress-bar-radius="35"
+scan-btn-progress-bar-transform="rotate(-90 50 50)"
+scan-btn-progress-circle-cx-coordinate="50%"
+scan-btn-progress-circle-cy-coordinate="50%"
+scan-btn-progress-circle-radius="35"
+scan-btn-progress-circle-style="fill: none; stroke: cyan; stroke-width: 6;"
+ios-camera-permission= "false"
+auto-scan-instruction-idle-on-desktop="Reload to detect a marker"
+
+show-guide-view="true"></script>
+
+  </head>
+  <body class="dark">
+      <div id="unity-container" class="unity-desktop">
+        <canvas id="unity-canvas" style="position: absolute;"></canvas>
+      </div>
+<script>
+
+var Yrotvalue = undefined;
+var UNITYINSTANCE = undefined;
+const cameraObjectName = "webarCamera";
+const stageObjectName = "webarStage";
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/WebAR-WebAR-CarController.loader.js";
+      const config = {
+        dataUrl: buildUrl + "/WebAR-WebAR-CarController.data.unityweb",
+        frameworkUrl: buildUrl + "/WebAR-WebAR-CarController.framework.js.unityweb",
+        codeUrl: buildUrl + "/WebAR-WebAR-CarController.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "WebAR-CarController",
+        productVersion: "0.1",
+      };
+
+      const container = document.querySelector("#unity-container");
+      const canvas = document.querySelector("#unity-canvas");
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+      }
+      else {
+        // Desktop Unity Container: set the container/canvas for full screen
+        container.style.width = "100%";
+        container.style.height = "100%";
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+      }
+
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+
+        }).then((unityInstance) => {
+          UNITYINSTANCE  = unityInstance;
+          }).catch((message) => {
+          alert(message);
+        });
+      };
+
+      //WEBAR SDK INIT function 
+      document.body.appendChild(script);
+	    function GetCommand(str){
+		        Yrotvalue=(str);
         }
 
-        function initializeAR() {
-            if (typeof LightshipWebAR === 'undefined') {
-                console.error('LightshipWebAR is not defined. Make sure the SDK script is loaded properly.');
-                return;
-            }
-
-            // Initialize Lightship WebAR SDK
-            LightshipWebAR.create({
-                clientID: 'ei6Og64UeJ7y243HNfIqka6GUJxDFRWJlnXI6GeDUW0Aguh1gB44z1CeGJaU8GPnjVQXz1',  // Replace with your Lightship client ID
-                container: document.getElementById('ar-container'),
-                onReady: onReady
-            });
-
-            function onReady(sdk) {
-                // Set up Three.js scene
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ alpha: true });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                document.body.appendChild(renderer.domElement);
-
-                // Load the .glb model
-                const loader = new THREE.GLTFLoader();
-                let model;
-                loader.load('Steerad.glb', (gltf) => {
-                    model = gltf.scene;
-                    model.scale.set(1, 1, 1); // Adjust scale as needed
-                    model.visible = false; // Initially hide the model until a surface is detected
-                    scene.add(model);
-                }, undefined, (error) => {
-                    console.error('An error occurred while loading the model', error);
-                });
-
-                camera.position.z = 5;
-
-                // Animation loop
-                function animate() {
-                    requestAnimationFrame(animate);
-                    if (model) {
-                        model.rotation.y += 0.01; // Rotate model for visual effect
-                    }
-                    renderer.render(scene, camera);
-                }
-                animate();
-
-                // Handle AR tracking and placing objects
-                sdk.onFrame(({ hitTest }) => {
-                    if (hitTest && hitTest.length > 0) {
-                        const hit = hitTest[0];
-                        if (model) {
-                            model.position.set(hit.position.x, hit.position.y, hit.position.z);
-                            model.visible = true; // Show the model when a surface is detected
-                        }
-                    }
-                });
-
-                // Start AR session
-                sdk.start();
-            }
-        }
-    </script>
-</body>
+    WEBARSDK.InitUnityWebGL(canvas.id, cameraObjectName, stageObjectName, canvas.clientWidth, canvas.clientHeight);
+      </script>
+  </body>
 </html>
