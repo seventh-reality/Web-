@@ -1,4 +1,22 @@
 class ARSDK {
+    static initialize() {
+        this.setupWebXR();
+    }
+
+    static setupWebXR() {
+        if (navigator.xr) {
+            navigator.xr.requestSession('immersive-ar').then((session) => {
+                // Your AR session setup code here
+            }).catch((err) => {
+                console.error('Failed to start AR session', err);
+            });
+        } else {
+            console.error('WebXR not supported');
+        }
+    }
+}
+
+class ARSDK {
     constructor() {
         this.scene = null;
         this.camera = null;
