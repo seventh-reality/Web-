@@ -1,58 +1,62 @@
+let interval;
+let currentImg = 1;
 
-// Setup ThreeJS in the usual way
-const renderer = new THREE.WebGLRenderer();
-document.body.appendChild(renderer.domElement);
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+let root = "misc/imgs/";
+let srcArr = [];
 
-renderer.setAnimationLoop(render);
+function showControls(){
+    stopInterval();
 
-// Setup a Zappar camera instead of one of ThreeJS's cameras
-const camera = new ZapparThree.Camera();
+    document.getElementById("textLearn").style.display = "block";
+    document.getElementById("textLearn").textContent = "Change the position, rotation or scale.";
+    document.getElementById("imgControls").style.display = "block";
 
-// The Zappar library needs your WebGL context, so pass it
-ZapparThree.glContextSet(renderer.getContext());
+    
 
-// Create a ThreeJS Scene and set its background to be the camera background texture
-const scene = new THREE.Scene();
-scene.background = camera.backgroundTexture;
+    srcArr = ["moveLearn.png","rotateLearn.png","scaleLearn.png"];
 
-// Request the necessary permission from the user
-ZapparThree.permissionRequestUI().then((granted) => {
-    if (granted) camera.start();
-    else ZapparThree.permissionDeniedUI();
-});
+    
 
-// Set up our instant tracker group
-const tracker = new ZapparThree.InstantWorldTracker();
-const trackerGroup = new ZapparThree.InstantWorldAnchorGroup(camera, tracker);
-scene.add(trackerGroup);
+    currentImg = 0;
+    interval = setInterval(changeImg, 1500);
+    
+    
+}
 
-// Add some content
-const box = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(),
-    new THREE.MeshBasicMaterial()
-);
+function changeImg(){
 
-box.position.y = 0.5;
+    document.getElementById("imgControls").src = root + srcArr[currentImg];
+    console.log(currentImg);
+    if(currentImg >= srcArr.length - 1){
+        currentImg = 0;
+    }else{
+        currentImg++;
+    }
 
-trackerGroup.add(box);
+}
 
-let hasPlaced = false;
-const placementUI = document.getElementById("zappar-placement-ui") || document.createElement("div");
-placementUI.addEventListener("click", () => {
-    placementUI.remove();
-    hasPlaced = true;
-})
+function stopInterval(){
+    if(interval != null){
+        clearInterval(interval);
+    }
+    
+}
 
-// Set up our render loop
-function render() {
-    camera.updateFrame(renderer);
+function displayNone(n){
+    if(n == 1){
+        document.getElementById("textLearn").style.display = "block";
+        document.getElementById("imgControls").style.display = "block";
+    }
+}
 
-    if (!hasPlaced) tracker.setAnchorPoseFromCameraOffset(0, 0, -5);
+function showKeyframe(){
+    stopInterval();
 
-    renderer.render(scene, camera);
+    document.getElementById("textLearn").style.display = "block";
+    document.getElementById("textLearn").textContent = "Add the position and rotation to make an animation";
+    document.getElementById("imgControls").style.display = "block";
+    document.getElementById("imgControls").src = root + "cube.png";
+    document.getElementById("auxImg").src = root + "path.png";
+    
 }

@@ -1,21 +1,120 @@
-html,
-body {
+body{
     margin: 0;
-    padding: 0;
+    overflow-x: hidden;
+}
+/* intial page */
+#initialPage{
+    
+    /* position: absolute;
+    top: 100px;
+    left: 0; */
+
+    
+}
+#title{
+    /* background-color: rgb(221, 221, 221) */
+}
+#logoImg{
+    width: 650px;
+    margin-left: 50px;
+}
+#img1{
+    margin-left: 0;
+    padding-left: 0;
     width: 100%;
-    height: 100%;
+    height: 600px;
+    opacity: 0.5;
+    background-color: gray;
+    border-style: solid;
+    border-radius: 40px;
+}
+#editorLink{
+    position: absolute;
+    top: 35%;
+    left: 38%;
+    z-index: 2;
+    font-size: 100px;
+    text-decoration: none;
+    color: black
+}
+#editorLink:hover + #img1{
+    opacity: 0.2;
+}
+#img2{
+    margin-right: 0;
+    padding-right: 0;
+
+    
+    background-color: red;
+    border-style: solid;
+    border-radius: 40px;
 }
 
-#zappar-placement-ui {
-    position: absolute;
-    bottom: 30px;
-    width: 200px;
-    left: calc(50% - 100px);
+/* content */
 
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    text-align: center;
-    font-family: sans-serif;
-    padding: 10px;
-    border-radius: 5px;
+#textIntro{
+    margin-top: 50px;
+    font-size: 40px;
+}
+
+#content{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#learnTitle{
+    font-size: 50px;
+    background-color: green;
+}
+#learnOpt{
+    font-size: 30px;
+}
+/* editor */
+.btn{
+
+    background-color: rgb(134,142,150);
+}
+.marginBT{
+    margin-top: 20px;
+}
+#imgBtLoad{
+    width: 15px;
+    height: 15px;
+}
+
+#imgBtPreview{
+    width: 30px;
+    height: 25px;
+}
+#learnContent{
+    margin-top: 40px;
+}
+
+#textLearn{
+   display: none;
+}
+/* controls */
+#controls{
+    
+}
+#imgControls{
+    display: none;
+    position: absolute;
+    top: 120px;
+    left: 320px;
+}
+
+
+#footer{
+    margin: 0;
+}
+#copyright{
+    margin-top: 20px;
+}
+@media (min-width: 576px){
+
+    .jumbotron {
+        padding-top: 2rem;
+        padding-bottom: 0;
+    }
 }
