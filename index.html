@@ -6,13 +6,17 @@
     <title>Niantic Lightship WebAR Example</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://lightship.dev/sdk/webar/latest.js"></script>
+    <script src="https://lightship.dev/sdk/webar/latest.js" onload="initializeAR();" onerror="handleSDKError();"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
     <div id="ar-container"></div>
 
     <script>
-        window.onload = function() {
+        function handleSDKError() {
+            console.error('Failed to load Lightship WebAR SDK. Please check the script URL or network connection.');
+        }
+
+        function initializeAR() {
             if (typeof LightshipWebAR === 'undefined') {
                 console.error('LightshipWebAR is not defined. Make sure the SDK script is loaded properly.');
                 return;
@@ -71,7 +75,7 @@
                 // Start AR session
                 sdk.start();
             }
-        };
+        }
     </script>
 </body>
 </html>
