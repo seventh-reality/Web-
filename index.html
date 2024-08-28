@@ -3,22 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markerless AR SDK</title>
+    <title>Custom AR SDK</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="ar-sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
 </head>
-<body>
+<body style="margin: 0; overflow: hidden;">
     <div id="ar-container"></div>
-    <button id="start-ar">Start AR</button> <!-- Start AR button -->
+    <button id="scene1-btn">Load Scene 1</button>
+    <button id="scene2-btn">Load Scene 2</button>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const startButton = document.getElementById('start-ar');
-            
-            startButton.addEventListener('click', () => {
-                // Initialize the AR SDK here
-                ARSDK.initialize();
-            });
-        });
+        class CustomARSDK {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.arSession = null;
+                this.hitTestSource = null;
+                this.models = {};
+                this.currentScene = null;
+            }
+
+            initialize(container) {
+                this.setupThreeJS(container);
+                this.setupWebXR();
+                this.loadScenes();
+                this.setupEventListeners();
+            }
+
+            setupThreeJS(container) {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(this.renderer.domElement);
+            }
+
+            setupWebXR() {
+                if (navigator.xr) {
+                    document.getElementById('start-ar').addEventListener('click', () => {
+                        navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then(session => {
+                            this.arSession = session;
+                            this.setupHitTestSource();
+                            this.renderer.xr.enabled = true;
+                            this.renderer.xr.setSession(session);
+                            this.renderer.setAnimationLoop(() => this.render());
+                        });
+                    });
+                } else {
+                    console.error('WebXR not supported');
+                }
+            }
+
+            setupHitTestSource() {
+                this.arSession.requestReferenceSpace('viewer').then(referenceSpace => {
+                    this.arSession.requestHitTestSource({ space: referenceSpace }).then(source => {
+                        this.hitTestSource = source;
+                    });
+                });
+            }
+
+            loadScenes() {
+                this.loadScene('scene1', 'Steerad.glb');
+                this.loadScene('scene2', 'Steerad.glb');
+            }
+
+            loadScene(id, modelUrl) {
+                const loader = new THREE.GLTFLoader();
+                loader.load(modelUrl, gltf => {
+                    const model = gltf.scene;
+                    model.scale.set(1, 1, 1);
+                    this.models[id] = model;
+                }, undefined, error => {
+                    console.error('An error occurred while loading the model', error);
+                });
+            }
+
+            switchScene(id) {
+                if (this.currentScene) {
+                    this.scene.remove(this.currentScene);
+                }
+                this.currentScene = this.models[id];
+                this.scene.add(this.currentScene);
+            }
+
+            setupEventListeners() {
+                document.getElementById('scene1-btn').addEventListener('click', () => this.switchScene('scene1'));
+                document.getElementById('scene2-btn').addEventListener('click', () => this.switchScene('scene2'));
+                
+                window.addEventListener('resize', () => {
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                });
+            }
+
+            render() {
+                if (this.hitTestSource) {
+                    this.arSession.requestHitTestResults(this.hitTestSource).then(results => {
+                        if (results.length > 0) {
+                            const hit = results[0];
+                            if (this.currentScene) {
+                                this.currentScene.position.set(hit.pose.transform.position.x, hit.pose.transform.position.y, hit.pose.transform.position.z);
+                            }
+                        }
+                    });
+                }
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // Initialize the SDK
+        const arSDK = new CustomARSDK();
+        arSDK.initialize(document.getElementById('ar-container'));
     </script>
 </body>
 </html>
