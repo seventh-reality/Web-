@@ -1,366 +1,310 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <title>VITAL SIGNS MONITOR</title>
+<html>
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77033033-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-77033033-2');
+    </script>
+
+    <title>WebXR Viewer</title>
     <meta charset="utf-8">
-    <meta name="description" content="&lt;model-viewer&gt; template">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" href="./styles.css" rel="stylesheet"/>
-    <script type="module" src="sample-assistant-with-chatgpt.js"></script>
-    
-    <link rel="stylesheet" href="sample-assistant-with-chatgpt.css" type="css" />
- <button id="text-button" class="button hidden">Text</button>
+
     <style>
-      html {
-    virtual-keyboard: overlays-content;
-}
-
-#ox-progress-bar-container {
-    position: fixed !important;
-}
-
-#webar-context-button {
-    display: none !important;
-}
-
-.button {
-    display: block;
-
-    box-sizing: border-box;
-    width: 170px;
-    height: 48px;
-
-    padding: 13px 13.5px;
-    
-    border: 0;
-    border-radius: 10px;
-    
-    font-size: 16px;
-    line-height: 22px;
-    font-weight: 600;
-
-    transition: bottom 0.5s ease-in-out,
-        left 0.5s ease-in-out,
-        width 0.5s ease-in-out,
-        height 0.5s ease-in-out,
-        opacity 0.5s ease-in-out;
-
-    user-select: none;
-}
-
-#voice-button {
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-
-    background-color: #580088;
-    color: white;
-
-    opacity: 1;
-}
-
-#voice-button.hidden {
-    bottom: calc(-90px - 100%);
-}
-
-#voice-button.faded {
-    opacity: 0;
-}
-
-#text-button {
-    position: fixed;
-    bottom: 30px;
-    left: calc(50% - 85px);
-
-    background-color: white;
-    color: #580088;
-}
-
-#text-button.hidden {
-    bottom: calc(-30px - 100%);
-
-    opacity: 0;
-    pointer-events: none;
-}
-
-#text-button.faded {
-    left: 24px;
-    bottom: calc(env(keyboard-inset-top, 0%) + 24px);
-
-    width: calc(100vw - 48px);
-    height: 252px;
-
-    opacity: 0;
-    pointer-events: none;
-}
-
-.ox_logos_block{
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    height: 100%;
-}
-
-#top-bar {
-    position: fixed;
-    top: 0;
-    box-sizing: border-box;
-    width: 100vw;
-    height: 48px;
-    padding: 10px 16px;
-    background-color: #ffffff;
-    transition: top 0.5s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-#top-bar.hidden {
-    top: calc(-100%);
-}
-
-#top-bar .logo {
-    height: 35px;
-}
-
-#top-bar .ox_logos_block .logo {
-    height: 14px;
-}
-
-#top-bar .ox_logos_block span{
-    font-size: 20px;
-    top: -1px;
-    position: relative;
-}
-
-
-
-#text-form {
-    position: fixed;
-    left: 24px;
-    bottom: calc(env(keyboard-inset-top, 0%) + 24px);
-
-    box-sizing: border-box;
-    width: calc(100vw - 48px);
-    height: 252px;
-
-    transition: bottom 0.5s ease-in-out,
-        left 0.5s ease-in-out,
-        width 0.5s ease-in-out,
-        height 0.5s ease-in-out,
-        opacity 0.5s ease-in-out;
-
-    opacity: 1;
-}
-
-#text-form.faded {
-    position: fixed;
-    bottom: 30px;
-    left: calc(50% - 85px);
-
-    width: 170px;
-    height: 48px;
-
-    pointer-events: none;
-
-    opacity: 0;
-}
-
-#text-form.hidden {
-    position: fixed;
-    bottom: calc(-100%);
-
-    pointer-events: none;
-    opacity: 0;
-}
-
-#text-form #question-text {
-    box-sizing: border-box;
-    width: 100%;
-    height: 200px;
-
-    background-color: rgba(242, 241, 243, 0.9);
-
-    border: none;
-    border-radius: 10px;
-
-    resize: none;
-
-    padding: 14px;
-
-    font-family: "Open Sans", "Trebuchet MS", Arial, Helvetica, sans-serif;
-    font-size: 14px;
-    color: #000000;
-
-    transition: height 0.5s ease-in-out,
-        background-color 0.5s ease-in-out;
-}
-
-#text-form.faded #question-text {
-    background-color: rgba(255, 255, 255, 0);
-    height: 252px;
-}
-
-#text-form #close-text-form {
-    position: absolute;
-    top: -50px;
-    right: 0px;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    border: 0;
-    background: none;
-}
-
-#text-form #submit-text-form {
-    position: absolute;
-    bottom: -4px;
-    left: calc(50% - 56px);
-    width: 112px;
-    height: 40px;
-    font-size: 16px;
-    line-height: 16px;
-    color: #580088;
-    font-weight: 600;
-    background-color: white;
-    border: none;
-    border-radius: 10px;
-    opacity: 1;
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-}
-
-#text-form.faded #submit-text-form {
-    transform: translateY(-32px) scale(0.66);
-    opacity: 0;
-}
-
-#text-form button img{
-    width: 100%;
-}
-
-#status {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    box-sizing: border-box;
-    width: 170px;
-    height: 48px;
-    padding: 13px 16px;
-    border-radius: 10px;
-
-    display: grid;
-    grid-template-areas: 'status-name status-icon';
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr 16px;
-
-    font-size: 16px;
-    font-weight: 600;
-    font-style: italic;
-    line-height: 22px;
-
-    transition: transform 0.5s ease-in-out,
-        background-color 0.2s ease-in-out,
-        color 0.2s ease-in-out;
-}
-
-#status.listening {
-    background-color: rgba(255, 255, 255, 0.7);
-    color: #580088;
-}
-
-#status.thinking {
-    background-color: rgba(1, 85, 210, 0.7);
-    color: #FFFFFF;
-}
-
-#status.hidden {
-    transform: translate(-50%, -50%) scale(0);
-}
-
-#status > * {
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-}
-
-#status.listening > .for-listening {
-    opacity: 1;
-}
-
-#status.thinking > .for-thinking {
-    opacity: 1;
-}
-
-.status-name {
-    grid-area: status-name;
-}
-
-.status-icon {
-    grid-area: status-icon;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin: 3px 0;
-}
-
-#microphone-icon {
-    margin: -6px -6px;
-}
-
-.spinner {
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    
-    border: 2px solid #FFFFFF;
-    border-top-color: transparent;
-    border-radius: 8px;
-
-    animation: 1s linear 0s infinite running spin;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
+        /*
+        colors
+         */
+
+        /*https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/wp-content/themes/frontierline/fonts/ZillaSlab-Regular.woff2*/
+
+
+        @font-face { font-family: 'Zilla Slab'; font-weight: normal; font-style: normal; src: url("https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/wp-content/themes/frontierline/fonts/ZillaSlab-Regular.woff2") format("woff2"), url("https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/wp-content/themes/frontierline/fonts/ZillaSlab-Regular.woff") format("woff"); }
+        @font-face { font-family: 'Zilla Slab'; font-weight: bold; font-style: normal; src: url("https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/wp-content/themes/frontierline/fonts/ZillaSlab-Bold.woff2") format("woff2"), url("https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/wp-content/themes/frontierline/fonts/ZillaSlab-Bold.woff") format("woff"); }
+        /*@font-face { font-family: 'Zilla Slab'; font-weight: normal; font-style: italic; src: url("fonts/ZillaSlab-RegularItalic.woff2") format("woff2"), url("fonts/ZillaSlab-RegularItalic.woff") format("woff"); }*/
+        /*@font-face { font-family: 'Zilla Slab'; font-weight: bold; font-style: italic; src: url("fonts/ZillaSlab-BoldItalic.woff2") format("woff2"), url("fonts/ZillaSlab-BoldItalic.woff") format("woff"); }*/
+        /*@font-face { font-family: 'Open Sans'; font-weight: normal; font-style: normal; src: url("fonts/opensans-regular.woff2") format("woff2"), url("fonts/opensans-regular.woff") format("woff"); }*/
+        /*@font-face { font-family: 'Open Sans'; font-weight: bold; font-style: normal; src: url("fonts/opensans-bold.woff2") format("woff2"), url("fonts/opensans-bold.woff") format("woff"); }*/
+
+
+        body, html {
+            background-color: #ffffff;
+            color: #221E1D;
+            font-family: "Zilla Slab", "Open Sans", X-LocaleSpecific, sans-serif;
+            /*font-size: 12px;*/
+            line-height: 1.3em;
+        }
+
+        h1, h2, h3 {
+            background-color: #221E1D;
+            color: white;
+            padding: 0.25rem 0.25rem 0.5rem 0.4rem;
+            font-weight: normal;
+            margin: 2rem 0 0 0;
+        }
+
+        a {
+            color: #00a7e0;
+        }
+
+        li {
+            border: 1px solid #ccc;
+            background-color: #eee;
+        }
+
+        /* layout */
+
+        body, html {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 200px;
+        }
+
+        section {
+            margin: 0.5rem;
+        }
+        section > * {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        ul li img {
+            width: 100%;
+            height: auto;
+            margin:0;
+            padding:0;
+        }
+
+        .intro {
+            max-width: 40em;
+            padding: 0.5rem 0;
+        }
+
+        .source {
+            font-size: 0.8rem;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        li a {
+            font-size: 1.3rem;
+        }
+
+        li p {
+            margin-top: 0.5rem;
+        }
+
+        ul {
+            list-style: none;
+            margin:0;
+            padding:0;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+        }
+        li {
+            display: flex;
+            flex-direction: column;
+            padding: 0.5em;
+            margin: 0.5rem;
+            justify-content: flex-start;
+        }
+        li a.img {
+            flex: 1;
+            justify-self: flex-end;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
     </style>
-  </head>
+</head>
 <body>
-<div id="top-bar" class="hidden">
-     <div class="ox_logos_block">
-         <img class="logo" src="https://www.onirix.com/ox-experiences/onirix/onirix-new_logo.svg" alt="Onirix logo"/>
-         <span>+</span>        
-         <img class="logo" src="https://www.onirix.com/ox-experiences/onirix/cgp-logo.png" alt="Chat gpt logo"/>
-     </div>
- </div>
- 
- <button id="voice-button" class="button hidden">Voice</button>
- <link rel="stylesheet" href="sample-assistant-with-chatgpt.css" type="text/css" />
- <button id="text-button" class="button hidden">Text</button>
- 
- <form id="text-form" class="faded">
-     <textarea id="question-text"></textarea>
-     <button id="close-text-form" type="button">
-         <img src="https://www.onirix.com/ox-experiences/onirix/close-bg.svg" alt="Close"/>
-     </button>
-     <button id="submit-text-form" type="submit">Send</button>
- </form>
- 
- <div id="status" class="Listening hidden">
-     <span class="status-name for-listening">Listening...</span>
-     <span class="status-name for-thinking">Thinking...</span>
-     <div class="status-icon for-listening" id="microphone-icon"></div>
-     <div class="status-icon for-thinking"><div class="spinner"></div></div>
- </div>
-      </body>
+<section>
+    <h1>WebXR Viewer</h1>
+
+    <p class="intro">
+        Help Mozilla Research by taking part in WebXR viewer, an augmented reality and virtual reality application that lets you navigate to XR experiences just like websites.
+    </p>
+
+    <p class="intro">
+        Below you will find examples of WebXR experiences. If you are a developer, click the source code links to see how to use the <a href="https://github.com/mozilla/webxr-polyfill">WebXR polyfill</a> to create your own AR or VR experiences.
+    </p>
+</section>
+<section>
+    <h2>Samples</h2>
+
+
+    <ul>
+        <li>
+            <a href="http://apainter.webxrexperiments.com/">A-Painter</a>
+            <a class='source' href="wxrv://apainter.webxrexperiments.com/">wxrv</a>
+            <p>Draw in 3D</p>
+            <a class="img" href="http://apainter.webxrexperiments.com/">
+                <img src="./screenshots/apainter.png" width="300" height="200"/>
+            </a>
+        </li>
+
+        <li>
+            <a href="http://xr-store.webxrexperiments.com/">XR-Store</a>
+            <a class='source' href="wxrv://xr-store.webxrexperiments.com/">wxrv</a>
+            <p>Responsive XR app across various AR and VR displays</p>
+            <a class="img" href="http://xr-store.webxrexperiments.com/">
+                <img src="./screenshots/xrstore.jpg" width="300" height="200"/>
+            </a>
+        </li>
+    
+        <li>
+            <a href="http://apainter.webxrexperiments.com/?url=https://ucarecdn.com/0b45b93b-e651-42d8-ba49-b2df907575f3/">A-painter fox</a>
+            <a class='source' href="wxrv://apainter.webxrexperiments.com/?url=https://ucarecdn.com/0b45b93b-e651-42d8-ba49-b2df907575f3/">wxrv</a>
+            <p>A-Painter Fox</p>
+            <a class="img"  href="http://apainter.webxrexperiments.com/?url=https://ucarecdn.com/0b45b93b-e651-42d8-ba49-b2df907575f3/">
+                <img src="./screenshots/apainter.png" width="300" height="200"/>
+            </a>
+        </li>
+
+        <li>
+            <a href="http://apainter.webxrexperiments.com/?url=https://ucarecdn.com/962b242b-87a9-422c-b730-febdc470f203/">A-painter Balrog</a>
+            <a class='source' href="wxrv://apainter.webxrexperiments.com/?url=https://ucarecdn.com/962b242b-87a9-422c-b730-febdc470f203/">wxrv</a>
+            <p>A-Painter Balrog</p>
+            <a  class="img" href="http://apainter.webxrexperiments.com/?url=https://ucarecdn.com/962b242b-87a9-422c-b730-febdc470f203/">
+                <img src="./screenshots/apainter.png" width="300" height="200"/>
+            </a>
+        </li>
+
+
+    </ul>
+    <h2>Simple Examples</h2>
+
+    <ul>
+        <li>
+            <a href="examples/ar_simplest/">Simplest AR</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/ar_simplest/index.html">source</a>
+            <p>Use Three.js to position the Utah Teapot in an augmented reality scene.</p>
+            <a  class="img" href="examples/ar_simplest/">
+                <img src="examples/ar_simplest/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/vr_simplest/">Simplest VR</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/vr_simplest/index.html">source</a>
+            <p>Use Three.js to position the Utah Teapot in an virtual reality scene.</p>
+            <a class="img" href="examples/vr_simplest">
+                <img src="#" width="300" height="200"/>
+            </a>
+        </li>
+
+        <li>
+            <a href="examples/ar_anchors/">Anchors</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/ar_anchors/index.html">source</a>
+            <p>Position boxes in space and receive updated positions using ARKit anchors.</p>
+            <a  class="img" href="examples/ar_anchors/">
+                <img src="examples/ar_anchors/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/hit_test/">Hit testing</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/hit_test/index.html">source</a>
+            <p>Find anchors by tapping to search for surfaces.</p>
+            <a  class="img" href="examples/hit_test/">
+                <img src="examples/hit_test/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/peoples/">Peoples</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/peoples/index.html">source</a>
+            <p>Place animated people on surfaces.</p>
+            <a  class="img" href="examples/peoples/">
+                <img src="examples/peoples/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/boombox/">Boom box</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/boombox/index.html">source</a>
+            <p>A shiny boom box in an environment map</p>
+            <a  class="img" href="examples/boombox/">
+                <img src="examples/boombox/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/reticle/">Reticle</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/reticle/index.html">source</a>
+            <p>Place a reticle on surfaces.</p>
+            <a class="img" href="examples/reticle/">
+                <img src="examples/reticle/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/light/">Light</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/light/index.html">source</a>
+            <p>Place a reticle on surfaces with light estimation.</p>
+            <a  class="img" href="examples/light/">
+                <img src="examples/light/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/simplecv/">Simple CV</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/simplecv/index.html">source</a>
+            <p>Show average world brightness to demonstrate simple computer vision.</p>
+            <a  class="img" href="examples/simplecv/">
+                <img src="examples/simplecv/screenshot.png" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/opencv-face/">OpenCV Face</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/opencv-face/index.html">source</a>
+            <p>OpenCV face detector.</p>
+            <a  class="img" href="examples/opencv-face/">
+                <img src="examples/opencv-face/screenshot.png" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/opencv-aruco/">OpenCV Markers</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/opencv-aruco/index.html">source</a>
+            <p>OpenCV Aruco marker detector.</p>
+            <a  class="img" href="examples/opencv-aruco/">
+                <img src="examples/opencv-aruco/screenshot.png" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/image_detection/">Image Detection</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/image_detection/index.html">source</a>
+            <p>Image detector</p>
+            <a  class="img" href="examples/image_detection/">
+                <img src="examples/image_detection/screenshot.jpg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/face_tracking/">Face Tracking</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/face_tracking/index.html">source</a>
+            <p>Face tracker.</p>
+            <a class="img" href="examples/face_tracking/">
+                <img src="examples/face_tracking/screenshot.jpg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/sensing/">World Sensing</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/sensing/index.html">source</a>
+            <p>Show world sensing data from WebXR.</p>
+            <a class="img" href="examples/sensing/">
+                <img src="examples/sensing/screenshot.jpg" width="300" height="200"/>
+            </a>
+        </li>
+        <li>
+            <a href="examples/persistence/">Map Sharing and Persistence</a>
+            <a class="source" href="https://github.com/mozilla/webxr-polyfill/blob/master/examples/persistence/index.html">source</a>
+            <p>Small test app to see if ARKit Map Sharing is working.</p>
+            <a class="img" href="examples/persistence/">
+                <img src="examples/persistence/screenshot.jpeg" width="300" height="200"/>
+            </a>
+        </li>
+    </ul>
+</section>
+</body>
 </html>
