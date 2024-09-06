@@ -7,6 +7,7 @@
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
+    #startAR { position: absolute; top: 20px; left: 20px; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 10; }
   </style>
   
   <!-- Include Three.js -->
@@ -17,6 +18,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.6.1/dist/tf.min.js"></script>
 </head>
 <body>
+
+<button id="startAR">Start AR</button>
 
 <script>
   let scene, camera, renderer, gltfLoader, xrSession;
@@ -64,13 +67,12 @@
       // Set up hit-test for surface tracking
       session.requestReferenceSpace('viewer').then((referenceSpace) => {
         session.requestHitTestSource({ space: referenceSpace }).then((hitTestSource) => {
-          const frameOfReference = renderer.xr.getFrameOfReference();
           renderer.setAnimationLoop((timestamp, frame) => {
             let hitTestResults = frame.getHitTestResults(hitTestSource);
             if (hitTestResults.length > 0) {
               let hit = hitTestResults[0];
               reticle.visible = true;
-              reticle.matrix.fromArray(hit.getPose(frameOfReference).transform.matrix);
+              reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
             } else {
               reticle.visible = false;
             }
@@ -79,6 +81,8 @@
           });
         });
       });
+    }).catch((error) => {
+      console.error('Failed to start AR session:', error);
     });
   }
 
@@ -93,6 +97,10 @@
 
   // Initialize TensorFlow.js model (for AI-based tasks, optional)
   async function initTensorFlowModel() {
+    if (typeof tf === 'undefined') {
+      console.error('TensorFlow.js is not loaded.');
+      return;
+    }
     const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/1/default/1');
     console.log('TensorFlow.js model loaded');
     // Add your TensorFlow.js tasks here (e.g., object detection)
@@ -103,9 +111,13 @@
     initThreeJS();
     createReticle();
     loadGLBModel();
-    initWebXR();
     initTensorFlowModel();  // Optional: only if you need AI-based features
   }
+
+  // Wait for user interaction (button click) to start AR session
+  document.getElementById('startAR').addEventListener('click', () => {
+    initWebXR();
+  });
 
   window.addEventListener('load', initARScene);
 </script>
