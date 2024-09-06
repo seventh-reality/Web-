@@ -1,253 +1,109 @@
-s<!DOCTYPE html>
-<!--
-Copyright 2018 The Immersive Web Community Group
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markerless Web AR with Three.js and TensorFlow.js</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+  <!-- Include Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- TensorFlow.js (Optional for AI integration) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.6.1/dist/tf.min.js"></script>
+</head>
+<body>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+<script>
+  let scene, camera, renderer, gltfLoader, xrSession;
+  let reticle, model;
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  // Set up Three.js scene
+  function initThreeJS() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;  // Enable WebXR for AR
+    document.body.appendChild(renderer.domElement);
+  }
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, user-scalable=no"
-    />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="css/common.css" />
+  // Load GLB model and add it to the scene
+  function loadGLBModel() {
+    gltfLoader = new THREE.GLTFLoader();
+    gltfLoader.load('Steerad.glb', (gltf) => {
+      model = gltf.scene;
+      model.visible = false;  // Model is hidden initially
+      scene.add(model);
+    });
+  }
 
-    <title>Hit Test</title>
-  </head>
-  <body>
-    <header>
-      <details open>
-        <summary>Hit Test</summary>
-        <p>
-          This sample demonstrates use of hit testing to place virtual objects
-          on real-world surfaces.
-          <a class="back" href="./">Back</a>
-        </p>
-      </details>
-    </header>
+  // Handle the placement of the 3D model on the detected surface
+  function placeModelAtReticle() {
+    if (reticle.visible && model) {
+      model.position.setFromMatrixPosition(reticle.matrix);
+      model.visible = true;
+    }
+  }
 
-    <div id="content">
-      <button type="button" id="eng-btn">English</button>
-      <button type="button" id="fr-btn">Français</button>
-    </div>
+  // Set up WebXR session for AR (with surface tracking)
+  function initWebXR() {
+    navigator.xr.requestSession('immersive-ar', {
+      requiredFeatures: ['hit-test', 'dom-overlay'],
+      domOverlay: { root: document.body }
+    }).then((session) => {
+      renderer.xr.setSession(session);
+      xrSession = session;
 
-    <script type="module">
-      import { WebXRButton } from "./js/util/webxr-button.js";
-      import { Scene } from "./js/render/scenes/scene.js";
-      import {
-        Renderer,
-        createWebGLContext,
-      } from "./js/render/core/renderer.js";
-      import { Node } from "./js/render/core/node.js";
-      import { Gltf2Node } from "./js/render/nodes/gltf2.js";
-      import { DropShadowNode } from "./js/render/nodes/drop-shadow.js";
-      import { vec3 } from "./js/render/math/gl-matrix.js";
-      import { Ray } from "./js/render/math/ray.js";
-
-      // XR globals.
-      let xrButton = null;
-      let xrRefSpace = null;
-      let xrViewerSpace = null;
-      let xrHitTestSource = null;
-
-      // WebGL scene globals.
-      let gl = null;
-      let renderer = null;
-      let scene = new Scene();
-      scene.enableStats(false);
-
-      let arObject = new Node();
-      arObject.visible = false;
-      scene.addNode(arObject);
-
-      let kiosk = new Gltf2Node({ url: "assets/big_ben.gltf" });
-      vec3.set(kiosk.scale, 0.285, 0.285, 0.285);
-      arObject.addNode(kiosk);
-
-      let reticle = new Gltf2Node({ url: "assets/reticle.gltf" });
-      reticle.visible = false;
-
-      // Set the initial scale of the reticle
-      let reticleScale = 2.5;
-      vec3.set(reticle.scale, reticleScale, reticleScale, reticleScale);
-
-      // Adjust the scale of individual nodes within the reticle model
-      if (reticle.children && reticle.children.length > 0) {
-        for (let child of reticle.children) {
-          vec3.set(child.scale, reticleScale, reticleScale, reticleScale);
-        }
-      }
-      scene.addNode(reticle);
-
-      // Having a really simple drop shadow underneath an object helps ground
-      // it in the world without adding much complexity.
-      let shadow = new DropShadowNode();
-      vec3.set(shadow.scale, 0.65, 0.65, 0.65);
-      arObject.addNode(shadow);
-
-      const MAX_KIOSKS = 1;
-      let kiosks = [];
-
-      // Ensure the background is transparent for AR.
-      scene.clear = false;
-
-      function initXR() {
-        xrButton = new WebXRButton({
-          onRequestSession: onRequestSession,
-          onEndSession: onEndSession,
-          textEnterXRTitle: "START AR",
-          textXRNotFoundTitle: "AR NOT FOUND",
-          textExitXRTitle: "EXIT  AR",
-        });
-        document.querySelector("header").appendChild(xrButton.domElement);
-
-        if (navigator.xr) {
-          navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
-            xrButton.enabled = supported;
+      // Set up hit-test for surface tracking
+      session.requestReferenceSpace('viewer').then((referenceSpace) => {
+        session.requestHitTestSource({ space: referenceSpace }).then((hitTestSource) => {
+          const frameOfReference = renderer.xr.getFrameOfReference();
+          renderer.setAnimationLoop((timestamp, frame) => {
+            let hitTestResults = frame.getHitTestResults(hitTestSource);
+            if (hitTestResults.length > 0) {
+              let hit = hitTestResults[0];
+              reticle.visible = true;
+              reticle.matrix.fromArray(hit.getPose(frameOfReference).transform.matrix);
+            } else {
+              reticle.visible = false;
+            }
+            renderer.render(scene, camera);
+            placeModelAtReticle();
           });
-        }
-      }
-
-      function onRequestSession() {
-        return navigator.xr
-          .requestSession("immersive-ar", {
-            requiredFeatures: ["local", "hit-test"],
-            optionalFeatures: ["dom-overlay"],
-            domOverlay: {
-              root: document.getElementById("content"),
-            },
-          })
-          .then((session) => {
-            xrButton.setSession(session);
-            onSessionStarted(session);
-          });
-      }
-
-      function onSessionStarted(session) {
-        session.addEventListener("end", onSessionEnded);
-        session.addEventListener("select", onSelect);
-        document.getElementById("eng-btn").style.display = "block";
-        document.getElementById("fr-btn").style.display = "block";
-
-        if (!gl) {
-          gl = createWebGLContext({
-            xrCompatible: true,
-          });
-
-          renderer = new Renderer(gl);
-
-          scene.setRenderer(renderer);
-        }
-
-        session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
-
-        // In this sample we want to cast a ray straight out from the viewer's
-        // position and render a reticle where it intersects with a real world
-        // surface. To do this we first get the viewer space, then create a
-        // hitTestSource that tracks it.
-        session.requestReferenceSpace("viewer").then((refSpace) => {
-          xrViewerSpace = refSpace;
-          session
-            .requestHitTestSource({ space: xrViewerSpace })
-            .then((hitTestSource) => {
-              xrHitTestSource = hitTestSource;
-            });
         });
+      });
+    });
+  }
 
-        session.requestReferenceSpace("local").then((refSpace) => {
-          xrRefSpace = refSpace;
+  // Create a reticle to visualize where the object will be placed
+  function createReticle() {
+    const geometry = new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    reticle = new THREE.Mesh(geometry, material);
+    reticle.visible = false;
+    scene.add(reticle);
+  }
 
-          session.requestAnimationFrame(onXRFrame);
-        });
-      }
+  // Initialize TensorFlow.js model (for AI-based tasks, optional)
+  async function initTensorFlowModel() {
+    const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/1/default/1');
+    console.log('TensorFlow.js model loaded');
+    // Add your TensorFlow.js tasks here (e.g., object detection)
+  }
 
-      function onEndSession(session) {
-        xrHitTestSource.cancel();
-        xrHitTestSource = null;
-        session.end();
-      }
+  // Initialize the entire AR scene
+  function initARScene() {
+    initThreeJS();
+    createReticle();
+    loadGLBModel();
+    initWebXR();
+    initTensorFlowModel();  // Optional: only if you need AI-based features
+  }
 
-      function onSessionEnded(event) {
-        xrButton.setSession(null);
-      }
+  window.addEventListener('load', initARScene);
+</script>
 
-      // Adds a new object to the scene at the
-      // specificed transform.
-      function addARObjectAt(matrix) {
-        let newKiosk = arObject.clone();
-        newKiosk.visible = true;
-        newKiosk.matrix = matrix;
-        scene.addNode(newKiosk);
-
-        kiosks.push(newKiosk);
-
-        // For performance reasons if we add too many objects start
-        // removing the oldest ones to keep the scene complexity
-        // from growing too much.
-        if (kiosks.length > MAX_KIOSKS) {
-          let oldKiosk = kiosks.shift();
-          scene.removeNode(oldKiosk);
-        }
-      }
-
-      let rayOrigin = vec3.create();
-      let rayDirection = vec3.create();
-      function onSelect(event) {
-        if (reticle.visible) {
-          // The reticle should already be positioned at the latest hit point,
-          // so we can just use it's matrix to save an unnecessary call to
-          // event.frame.getHitTestResults.
-          addARObjectAt(reticle.matrix);
-        }
-      }
-
-      // Called every time a XRSession requests that a new frame be drawn.
-      function onXRFrame(t, frame) {
-        let session = frame.session;
-        let pose = frame.getViewerPose(xrRefSpace);
-
-        reticle.visible = false;
-
-        // If we have a hit test source, get its results for the frame
-        // and use the pose to display a reticle in the scene.
-        if (xrHitTestSource && pose) {
-          let hitTestResults = frame.getHitTestResults(xrHitTestSource);
-          if (hitTestResults.length > 0) {
-            let pose = hitTestResults[0].getPose(xrRefSpace);
-            reticle.visible = true;
-            reticle.matrix = pose.transform.matrix;
-          }
-        }
-
-        scene.startFrame();
-
-        session.requestAnimationFrame(onXRFrame);
-
-        scene.drawXRFrame(frame, pose);
-
-        scene.endFrame();
-      }
-
-      // Start the XR application.
-      initXR();
-    </script>
-  </body>
+</body>
 </html>
