@@ -58,14 +58,13 @@
   // Set up WebXR session for AR (with surface tracking)
   function initWebXR() {
     navigator.xr.requestSession('immersive-ar', {
-      requiredFeatures: ['hit-test', 'dom-overlay'],
-      domOverlay: { root: document.body }
+      requiredFeatures: ['hit-test']
     }).then((session) => {
       renderer.xr.setSession(session);
       xrSession = session;
 
       // Set up hit-test for surface tracking
-      session.requestReferenceSpace('viewer').then((referenceSpace) => {
+      session.requestReferenceSpace('local').then((referenceSpace) => {
         session.requestHitTestSource({ space: referenceSpace }).then((hitTestSource) => {
           renderer.setAnimationLoop((timestamp, frame) => {
             let hitTestResults = frame.getHitTestResults(hitTestSource);
