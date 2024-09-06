@@ -101,9 +101,13 @@
       console.error('TensorFlow.js is not loaded.');
       return;
     }
-    const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/1/default/1');
-    console.log('TensorFlow.js model loaded');
-    // Add your TensorFlow.js tasks here (e.g., object detection)
+    try {
+      const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/ssd_mobilenet_v2/1/default/1');
+      console.log('TensorFlow.js model loaded');
+      // Add your TensorFlow.js tasks here (e.g., object detection)
+    } catch (error) {
+      console.error('Error loading TensorFlow.js model:', error);
+    }
   }
 
   // Initialize the entire AR scene
@@ -116,10 +120,10 @@
 
   // Wait for user interaction (button click) to start AR session
   document.getElementById('startAR').addEventListener('click', () => {
+    initARScene();
     initWebXR();
   });
 
-  window.addEventListener('load', initARScene);
 </script>
 
 </body>
