@@ -52,12 +52,13 @@
   <div id="ui">
     <button id="toggleHelmet">Toggle Helmet</button>
     <button id="toggleSuit">Toggle Suit</button>
-    <button id="listParts">List Parts</button>
+    <div id="debug"></div>
   </div>
 
   <script>
     // Get the <model-viewer> instance
     const modelViewer = document.querySelector('#modelViewer');
+    const debugDiv = document.getElementById('debug');
 
     // Helper to find a part by name
     async function findMeshByName(name) {
@@ -81,23 +82,30 @@
       return foundMesh;
     }
 
-    // Debugging function to list all part names
-    async function listAllParts() {
+    // Helper to log all part names
+    async function logAllParts() {
       await modelViewer.updateComplete;
-      const scene = modelViewer.model?.scene;
 
+      const scene = modelViewer.model?.scene;
       if (!scene) {
         console.error('Model scene not found!');
         return;
       }
 
-      console.log("Available parts in the model:");
+      const partNames = [];
       scene.traverse((node) => {
-        if (node.name) {
-          console.log(node.name);
+        if (node.isMesh) {
+          partNames.push(node.name);
         }
       });
+
+      // Display part names for debugging
+      debugDiv.innerHTML = `<strong>Available Parts:</strong><br>${partNames.join('<br>')}`;
+      console.log('Available parts:', partNames);
     }
+
+    // Log all parts when the model loads
+    modelViewer.addEventListener('load', logAllParts);
 
     // Add toggle functionality for Helmet
     document.getElementById('toggleHelmet').addEventListener('click', async () => {
@@ -105,8 +113,7 @@
       if (helmet) {
         helmet.visible = !helmet.visible; // Toggle visibility
       } else {
-        alert('Helmet not found! Check the console for available parts.');
-        listAllParts();
+        alert('Helmet not found!');
       }
     });
 
@@ -116,13 +123,9 @@
       if (suit) {
         suit.visible = !suit.visible; // Toggle visibility
       } else {
-        alert('Suit not found! Check the console for available parts.');
-        listAllParts();
+        alert('Suit not found!');
       }
     });
-
-    // Button to list all parts in the console
-    document.getElementById('listParts').addEventListener('click', listAllParts);
   </script>
 </body>
 </html>
