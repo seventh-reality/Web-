@@ -52,6 +52,7 @@
   <div id="ui">
     <button id="toggleHelmet">Toggle Helmet</button>
     <button id="toggleSuit">Toggle Suit</button>
+    <button id="listParts">List Parts</button>
   </div>
 
   <script>
@@ -80,13 +81,32 @@
       return foundMesh;
     }
 
+    // Debugging function to list all part names
+    async function listAllParts() {
+      await modelViewer.updateComplete;
+      const scene = modelViewer.model?.scene;
+
+      if (!scene) {
+        console.error('Model scene not found!');
+        return;
+      }
+
+      console.log("Available parts in the model:");
+      scene.traverse((node) => {
+        if (node.name) {
+          console.log(node.name);
+        }
+      });
+    }
+
     // Add toggle functionality for Helmet
     document.getElementById('toggleHelmet').addEventListener('click', async () => {
       const helmet = await findMeshByName('Helmet'); // Replace "Helmet" with the actual part name
       if (helmet) {
         helmet.visible = !helmet.visible; // Toggle visibility
       } else {
-        alert('Helmet not found!');
+        alert('Helmet not found! Check the console for available parts.');
+        listAllParts();
       }
     });
 
@@ -96,9 +116,13 @@
       if (suit) {
         suit.visible = !suit.visible; // Toggle visibility
       } else {
-        alert('Suit not found!');
+        alert('Suit not found! Check the console for available parts.');
+        listAllParts();
       }
     });
+
+    // Button to list all parts in the console
+    document.getElementById('listParts').addEventListener('click', listAllParts);
   </script>
 </body>
 </html>
