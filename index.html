@@ -3,30 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Model Editor with AR</title>
+  <title>Model Editor with Click Interaction</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 8px;
-    }
-    #ui button {
-      margin: 5px 0;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    #ui button:hover {
-      background: #0056b3;
-    }
+    body { margin: 0; }
     model-viewer {
       width: 100vw;
       height: 100vh;
@@ -48,82 +28,51 @@
     touch-action="pan-y">
   </model-viewer>
 
-  <!-- UI for toggling parts -->
-  <div id="ui">
-    <button id="toggleHelmet">Toggle Helmet</button>
-    <button id="toggleSuit">Toggle Suit</button>
-    <div id="debug"></div>
-  </div>
-
   <script>
-    // Get the <model-viewer> instance
+    // Get the model-viewer element
     const modelViewer = document.querySelector('#modelViewer');
-    const debugDiv = document.getElementById('debug');
 
-    // Helper to find a part by name
-    async function findMeshByName(name) {
+    // Initialize a three.js Raycaster and a Mouse Vector2
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Set up event listener for clicks on the model-viewer canvas
+    modelViewer.addEventListener('click', async (event) => {
       // Wait for the model to load
       await modelViewer.updateComplete;
 
-      // Access the 3D scene
+      // Get the bounding rect of the model-viewer
+      const rect = modelViewer.getBoundingClientRect();
+
+      // Calculate normalized device coordinates of the click
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      // Get the 3D scene from model-viewer
       const scene = modelViewer.model?.scene;
-      if (!scene) {
-        console.error('Model scene not found!');
-        return null;
-      }
+      const camera = modelViewer.getCamera();
 
-      // Traverse the scene to find the mesh by name
-      let foundMesh = null;
-      scene.traverse((node) => {
-        if (node.name === name) {
-          foundMesh = node;
-        }
-      });
-      return foundMesh;
-    }
-
-    // Helper to log all part names
-    async function logAllParts() {
-      await modelViewer.updateComplete;
-
-      const scene = modelViewer.model?.scene;
       if (!scene) {
         console.error('Model scene not found!');
         return;
       }
 
-      const partNames = [];
-      scene.traverse((node) => {
-        if (node.isMesh) {
-          partNames.push(node.name);
-        }
-      });
+      // Update the raycaster with the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
 
-      // Display part names for debugging
-      debugDiv.innerHTML = `<strong>Available Parts:</strong><br>${partNames.join('<br>')}`;
-      console.log('Available parts:', partNames);
-    }
+      // Get all intersected objects
+      const intersects = raycaster.intersectObjects(scene.children, true);
 
-    // Log all parts when the model loads
-    modelViewer.addEventListener('load', logAllParts);
+      if (intersects.length > 0) {
+        // Get the first intersected object
+        const intersectedObject = intersects[0].object;
 
-    // Add toggle functionality for Helmet
-    document.getElementById('toggleHelmet').addEventListener('click', async () => {
-      const helmet = await findMeshByName('Helmet'); // Replace "Helmet" with the actual part name
-      if (helmet) {
-        helmet.visible = !helmet.visible; // Toggle visibility
+        // Toggle visibility
+        intersectedObject.visible = !intersectedObject.visible;
+
+        console.log(`Toggled visibility of: ${intersectedObject.name}`);
       } else {
-        alert('Helmet not found!');
-      }
-    });
-
-    // Add toggle functionality for Suit
-    document.getElementById('toggleSuit').addEventListener('click', async () => {
-      const suit = await findMeshByName('Suit'); // Replace "Suit" with the actual part name
-      if (suit) {
-        suit.visible = !suit.visible; // Toggle visibility
-      } else {
-        alert('Suit not found!');
+        console.log('No object hit.');
       }
     });
   </script>
