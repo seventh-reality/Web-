@@ -14,23 +14,22 @@
     }
     #overlay {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 20px;
+      left: 20px;
       z-index: 10;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     button {
       background: #007bff;
       color: white;
       padding: 10px 15px;
-      margin: 5px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
       font-size: 14px;
+      transition: background 0.3s ease;
     }
     button:hover {
       background: #0056b3;
@@ -44,9 +43,6 @@
   </style>
 </head>
 <body>
-  <!-- Overlay with control buttons -->
- 
-
   <!-- AR-enabled Model Viewer -->
   <model-viewer
     id="modelViewer"
@@ -57,17 +53,16 @@
     interaction-prompt="auto"
     animation-name="idle"
     environment-image="neutral"
-    skybox-image="neutral"
     exposure="1"
     auto-rotate
-    shadow-intensity="1"
-    style="display: block;">
-     <div id="overlay">
-    <button onclick="toggleAnimation()">Toggle Animation</button>
-    <button onclick="placeModel()">Place Model</button>
-  </div>
-    
+    shadow-intensity="1">
   </model-viewer>
+
+  <!-- Overlay with control buttons -->
+  <div id="overlay">
+    <button onclick="toggleAnimation()">Toggle Animation</button>
+    <button onclick="placeModel()">Start AR View</button>
+  </div>
 
   <script>
     const modelViewer = document.getElementById('modelViewer');
@@ -83,19 +78,19 @@
       animationPlaying = !animationPlaying;
     }
 
-    // Place model on surface
+    // Trigger AR view
     function placeModel() {
       modelViewer.activateAR();
     }
 
-    // Event listener for model click to toggle animation
-    modelViewer.addEventListener('click', () => {
-      toggleAnimation();
-    });
-
     // Debug: Log AR status
     modelViewer.addEventListener('ar-status', (event) => {
-      console.log(`AR status: ${event.detail.status}`);
+      if (event.detail.status === 'failed') {
+        console.error('AR failed to start.');
+        alert('AR mode is not supported or failed to start.');
+      } else {
+        console.log(`AR status: ${event.detail.status}`);
+      }
     });
   </script>
 </body>
