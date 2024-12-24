@@ -1,477 +1,123 @@
-<!-- FONT ICONS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<div class="arButtondiv">
-    <button class="arButtonclass" id="arButton">Launch AR<img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/QXFVPB/png_arrow_edgwk.png" /></button>
-</div>
-<div class="hamburger-menu">
-  <div class="hamburger" id="hamburger">
-    <i class="fa-solid fa-angle-up angle_up_output"></i>
-  </div>
-</div>
-<!-- Carousel Default -->
-<div class="carousel-default carousal_user_specification" id="carouselDefault">
-  <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/closepopup_mfxag.png" alt="" class="cross_icon_hamburger" id="closeCarouselInfo"  />
-  <div class="carousel-inner">
-    <div class="hand_gestures">Hand Gestures</div>
-    <div class="item active">
-      <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/rotate_8ywmh.png" alt="Second slide">
-      <div class="carousel-caption">
-        <h3>MOVE</h3>
-        <p>Move your fingertip over surface without losing contact.</p>
-      </div>
-    </div>
-    <div class="item">
-      <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/rotate_8ywmh.png" alt="Second slide">
-      <div class="carousel-caption">
-        <h3>ROTATE</h3>
-        <p>Move your finger horizontally anywhere on the screen to rotate.</p>
-      </div>
-    </div>
-    <div class="item">
-      <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/scale_4eikq.png" alt="scale">
-      <div class="carousel-caption">
-        <h3>SCALE</h3>
-        <p>Pinch in and out on the screen to zoom out and zoom in the experience.</p>
-      </div>
-    </div>
-  </div>
-  <a class="left carousel-control"  role="button" onclick="changeSlide(-1)">&#10094;</a>
-  <a class="right carousel-control" role="button" onclick="changeSlide(1)">&#10095;</a>
-</div>
-
-<!-- /end Carousel Default -->
-<!-- /end Carousel Default -->
-<div class="menu-card" id="menuCard">
-  <!-- Content of the menu card goes here -->
-  <div class="preview_menu">
-        <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/closepopup_mfxag.png" alt=""  class="menu_icon_hamburger" id="closeCarousel"/>
-    <div class="top_menu">
-      <ul>
-        <li  id="shareUrl">
-         <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/shareopt_owwzy.png" alt="" />
-          <span>Share</span>
-        </li>
-        <li id="muteButton">
-          <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/muteopt_t4ihs.png" alt="" />
-          <span>Mute</span>
-        
-        </li>
-        <li id="infoIcon"> <!-- Add id to this list item -->
-         <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/infoopt_p5ixs.png" alt="" />
-          <span>Info</span>
-        </li>
-      </ul>
-    </div>
-    <div class="bottom_actions">
-      <ul>
-        <li>
-        <div>
-         <img class="camera_image_op" id="cameraButton" src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/cameraopt_u4n29.png" alt="" />
-       </div> 
-       </li>
-        <li>
-            <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/46169e16-764c-4bcd-92f9-ccf4ed6312d4/recordopt_vunbx.png" id="startRecording" alt="" />
-         
-        </li>
-        <li class="3dbuttonli">
-            <!-- view 3d button-->
-            <img src="https://s3.ap-south-1.amazonaws.com/dev-plugxrassets/uploads/user_files/QXFVPB/3d_j0x7y.png" id="3dButton" alt="" />
-          <p>View 3D</p>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-<script>
-  const arButton = document.getElementById('arButton');
-  const _3dButton = document.getElementById('3dButton');
-  const hamburger = document.getElementById('hamburger');
-  const menuCard = document.getElementById('menuCard');
-  const infoIcon = document.getElementById('infoIcon'); // Add this line
-  const menuIconHamburger = document.querySelector('.menu_icon_hamburger'); // Add this line
-  const shareUrlBtn=document.getElementById('shareUrl')
-  const muteButton=document.getElementById('muteButton')
-
-    // Get all audio and video elements
-  var mediaElements = document.querySelectorAll('audio, video');
-
- _3dButton.addEventListener('click',()=>{
-     window.location.reload();
- })
-  hamburger.addEventListener('click', () => {
-    menuCard.classList.toggle('active');
-    hamburger.style.display = 'none'; // Hide hamburger when clicked
-  });
-
-  infoIcon.addEventListener('click', () => { // Add this block
-    const carousel = document.querySelector('.carousel-default');
-    carousel.classList.add('active');
-    menuCard.classList.remove('active'); // Close the hamburger menu
-    hamburger.style.display = 'none'; // Hide hamburger when clicked
-// Show hamburger icon
-
-  });
-
-  const closeCarousel = document.getElementById('closeCarousel');
-  const closeCarouselDefault = document.getElementById('closeCarouselInfo');
-
-  closeCarousel.addEventListener('click', () => {
-    const carousel = document.querySelector('.carousel-default');
-    carousel.classList.remove('active');
-    menuCard.classList.toggle('active');
-    hamburger.style.display = 'flex'; // Show hamburger when menu icon is clicked
-
-  });
-  closeCarouselDefault.addEventListener('click', () => {
-    const carousel = document.querySelector('.carousel-default');
-    carousel.classList.remove('active');
-    menuCard.classList.toggle('active');
-  });
- shareUrlBtn.addEventListener('click', function() {
-  // Get the current URL
-  var currentURL = window.location.href;
-  
-  // Check if the browser supports the Web Share API
-  if (navigator.share) {
-    navigator.share({
-      title: document.title,
-      text: 'Check out this webpage:',
-      url: currentURL,
-    })
-    .then(() => console.log('Shared successfully'))
-    .catch((error) => console.log('Error sharing:', error));
-  } else {
-    // Fallback for browsers that don't support Web Share API
-    alert("Your browser doesn't support sharing.");
-  }
-})
-let currentIndex = 0;
-const items = document.querySelectorAll('.item');
-
-function showSlide(index) {
-  if (index >= items.length) {
-    index = 0;
-  } else if (index < 0) {
-    index = items.length - 1;
-  }
-
-  items.forEach((item, i) => {
-    if (i === index) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
-    }
-  });
-
-  currentIndex = index;
-}
-
-function changeSlide(direction) {
-  showSlide(currentIndex + direction);
-}
-
-showSlide(currentIndex);
-
-
-</script>
-<style>
-    body, html {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8th Wall & PlugXR Combined AR</title>
+  <script src="https://apps.8thwall.com/xrweb.js"></script>
+  <script type="module" src="https://cdn.plugxr.com/lib/pxr.js"></script>
+  <style>
+    body {
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
     }
-     .arButtondiv{
-        color: #fff;
-        font-family: "Nunito";
-        height 32px;
-        font-weight: 700;
-        font-size :14px;
-        text-transform: none;
+    canvas {
+      display: block;
     }
-    .arButtonclass{
-        position: fixed;
-        border-radius: 8px;
-        border: none;
-        background-color: #0085ff !important;
-        padding: 10px 20px;
-        left: 50%;
-        width: 225px;
-        bottom: 45px;
-        transform: translate(-50%, 0px);
-    }
-    .arButtonclass:hover{
-        background-color: #2196f3 !important;
-    }
-    .arButtonclass img{
-        margin: -2px 0px 0px 9px;
-    }.3dbuttonli span{
-        position: relative;
-        top: 40px;
-        left: -12px;
-    }
-    
-    .3dbuttonli img{
-            position: relative;
-        left: 30px;
-        
-    }
-    .hamburger-menu {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-      border-radius: 10px 10px 0px 0px;
-    }
-.angle_up_output{
-        background: rgba(8, 47, 84, 1);
-    padding: 7px;
-    color: #fff;
-    border-radius: 50px;
-}
-    .line {
-      width: 100%;
-      height: 4px;
-      background-color: black;
-    }
-
-    .menu-card {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9998;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    .menu-card p {
+    #ui-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
       color: white;
-    }
-
-    .menu-card.active {
-      display: flex;
-    }
-    .preview_menu {
-        width: 345px;
-        border-radius: 5px;
-        background: rgba(8, 47, 84, 0.7);
-        position: absolute;
-        bottom: 50px;
-        color: #ffffff;
-        padding: 20px;
-        height: 208px;
-        border-radius: 45px;
-    }
-    .top_menu{
-        float: left;
-        width:100%;
-    }
-    .top_menu ul{
-        float: left;
-        width:100%;
-        margin: 0px;
-        padding: 0px;
-    }
-    .top_menu ul li{
-        float: left;
-        width:33.33%;
-        text-align: center;
-        list-style: none;
-        padding: 5px 0%;
-        cursor: pointer;
-        height: 93px;
-        display: flex;
-       justify-content: center;
-       align-items: center;
-       flex-direction: column;
-       border-radius: 4px;
-    }
-    .top_menu ul li:hover{
-       border-radius: 25px;
-       background-color: #082F54;
-    }
-     .top_menu ul li span{
-         float: left;
-         width: 100%;
-         font-size: 12px;
-         padding-top: 5px;
-     }
-    .d-none{
-        display: none;
-    }
-    .bottom_actions{
-        float: left;
-        width: 100%;
-        margin-top: 10px;
-    }
-    .bottom_actions ul{
-        float: left;
-        width: 100%;
-        margin: 0px;
-        padding: 0px;
-    }
-    .bottom_actions ul li{
-        float: left;
-        width: 33.33%;
-        list-style: none;
-        text-align: center;
-        cursor: pointer;
-    }
-    
-    .bottom_actions ul li .camera{
-        font-size: 30px;
-        color: #000000;
-       background-color: #ffffff;
-       border-radius: 50%;
-       padding: 10px;
-    }
-    
-    .bottom_actions ul li .record{
-       font-size: 40px;
-       color: red;
-       border: 4px solid #ffffff;
-       border-radius: 50%;
-       padding: 2px;
-    }
-    
-    .top_menu ul li i
- {
-  display: block;
-      font-size: 20px;
-}
-    
-.top_menu ul li span{
-    font-family: Nunito;
-    font-size: 14px;
-    font-weight:600;
-}
-      /*Carousel*/
-   
-   .carousel-default {
-    /* Your existing carousel styles */
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    z-index: 999;
-    width: 300px;
-    transform: translate(-50%, -50%);
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    height: 375px;
-  }
-  .carousel-control.left {
-    background-color: transparent;
-    background-image: none;
-    align-items: center;
-    height: 100%;
-    display: flex;
-    margin-left: 20px;
-}
-.carousel-control.right {
-    background-color: transparent;
-    background-image: none;
-    display: flex;
-    align-items: center;
-}
-.carousel {
-    height: 400px;
-}
-.carousel-inner>.item>img {
-    line-height: 1;
-        height: 125px;
-    width: 125px;
-    align-items: center;
-    /* display: -webkit-inline-box; */
-    text-align: center;
-    margin: auto;
-}
-  .close-carousel {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    cursor: pointer;
-    color: #ffffff;
-    font-size: 20px;
-  }
-
-  .carousel-default.active {
-    display: block;
-  }
-
-  .carousel-default:not(.active) {
-    display: none;
-  }
-    .item{
-        height: 250px;
-    }
-    .hand_gestures {
-        background: #0085FF;
-        color: #ffffff;
-        text-align: center;
-        padding: 11px 0px;
-        font-size: 14px;
-        letter-spacing: 0.2px;
-        font-family: 'Nunito';
-        border-radius: 10px 10px 0px 0px;
-    }
-    .carousel-indicators li, .carousel-indicators .active{
-        margin: 0 5px !important;
-        height: 10px;
-        width:10px;
-    }
-    .carousel-control{
-    }
-    .carousel-caption h3{
-      font-size: 20px;
-      font-family: Nunito;
-       
-    }
-    .carousel-caption p{
-      font-size: 12px;
-      font-family: Nunito;
-      color: #dcdcdc;
-    }
-   
-    .cross_icon_hamburger{
-      position: absolute;
-      top: -35px;
-      right: 0px;
-      cursor: pointer;
-      z-index: 111;
-    }
-    .camera_image_op{
-      background-color: #fff;
       padding: 10px;
-      border-radius: 40px;
-      margin-top: 10px;
+      border-radius: 8px;
     }
-    .menu_icon_hamburger{
-      position: absolute;
-      top: -15px;
-      right: 10px;
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 14px;
     }
-    .carousel-control.left{
-      background-color: transparent;
-    background-image: none;  
+    button:hover {
+      background: #0056b3;
     }
-     .carousel-control.right{
-      background-color: transparent;
-    background-image: none;  
-    }
-    @media .item.next.left{
-        transform:translate3d(10px,0,0);
-    }
-  </style><!-- FONT ICONS -->
+  </style>
+</head>
+<body>
+  <div id="ui-overlay">
+    <button id="startAR">Start AR</button>
+    <button id="toggleModel">Toggle Model</button>
+    <button id="toggleAnimation">Toggle Animation</button>
+    <button id="takeScreenshot">Take Screenshot</button>
+  </div>
 
+  <script>
+    let currentModel = null;
+    let animationPlaying = true;
 
+    // Initialize 8th Wall XR scene
+    XR8.addCameraPipelineModules([
+      XR8.GlTextureRenderer.pipelineModule(), // For rendering AR content
+      XR8.Threejs.pipelineModule(),          // Adds Three.js scene
+      XR8.XrController.pipelineModule(),     // Manages camera and AR tracking
+    ]);
+
+    const scene = XR8.Threejs.xrScene(); // Get Three.js scene and camera
+    const { renderer, camera, scene: threeScene } = scene;
+
+    // Add PlugXR integration
+    const app = PXR.init({
+      root: threeScene,
+      renderer: renderer,
+      camera: camera,
+    });
+
+    // Add a sample 3D model to the scene using PlugXR
+    function addModel() {
+      PXR.assets.loadModel('Steerad.glb', (model) => {
+        currentModel = model;
+        model.scale.set(0.5, 0.5, 0.5);
+        model.position.set(0, 0, -3); // Position in front of the user
+        threeScene.add(model);
+      });
+    }
+
+    // Toggle Animation
+    function toggleAnimation() {
+      if (currentModel && currentModel.animations.length > 0) {
+        const action = PXR.modelAnimationByName(currentModel, 'Idle');
+        if (animationPlaying) {
+          action.stop();
+        } else {
+          action.play();
+        }
+        animationPlaying = !animationPlaying;
+      }
+    }
+
+    // Take Screenshot
+    function takeScreenshot() {
+      PXR.xrScene().getscreenshot();
+      alert("Screenshot captured!");
+    }
+
+    // Button Event Listeners
+    document.getElementById('startAR').addEventListener('click', () => {
+      XR8.run({ canvas: document.querySelector('canvas') }); // Start 8th Wall AR
+    });
+
+    document.getElementById('toggleModel').addEventListener('click', addModel);
+    document.getElementById('toggleAnimation').addEventListener('click', toggleAnimation);
+    document.getElementById('takeScreenshot').addEventListener('click', takeScreenshot);
+
+    // Start 8th Wall and PlugXR AR
+    XR8.addCameraPipelineModule({
+      name: 'custom',
+      onUpdate: () => {
+        if (currentModel) {
+          currentModel.rotation.y += 0.01; // Rotate model for effect
+        }
+      },
+    });
+
+    XR8.run();
+  </script>
+</body>
+</html>
