@@ -3,78 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Model Editor with Click Interaction</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <title>Web AR - Model Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/three.min.js"></script>
   <style>
-    body { margin: 0; }
-    model-viewer {
-      width: 100vw;
-      height: 100vh;
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    #overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <!-- Model Viewer -->
-  <model-viewer 
-    id="modelViewer"
-    alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"
-    src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-    ar 
-    ar-modes="webxr scene-viewer quick-look"
-    environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
-    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
-    shadow-intensity="1"
-    camera-controls
-    touch-action="pan-y">
-  </model-viewer>
+  <div id="overlay">
+    <button onclick="toggleAnimation()">Toggle Animation</button>
+  </div>
 
   <script>
-    // Get the model-viewer element
-    const modelViewer = document.querySelector('#modelViewer');
+    let scene, camera, renderer, model, mixer, clock, animationActive = false;
+    let surface, reticle;
 
-    // Initialize a three.js Raycaster and a Mouse Vector2
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    // Initialize Three.js scene
+    function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
 
-    // Set up event listener for clicks on the model-viewer canvas
-    modelViewer.addEventListener('click', async (event) => {
-      // Wait for the model to load
-      await modelViewer.updateComplete;
+      clock = new THREE.Clock();
 
-      // Get the bounding rect of the model-viewer
-      const rect = modelViewer.getBoundingClientRect();
+      // Add light
+      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+      light.position.set(0, 1, 0);
+      scene.add(light);
 
-      // Calculate normalized device coordinates of the click
-      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      // Orbit Controls for debugging (disable in production)
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 0, 0);
+      controls.update();
 
-      // Get the 3D scene from model-viewer
-      const scene = modelViewer.model?.scene;
-      const camera = modelViewer.getCamera();
+      // AR.js markerless SLAM
+      const arToolkitSource = new THREEx.ArToolkitSource({ sourceType: 'webcam' });
+      arToolkitSource.init(() => onResize());
+      window.addEventListener('resize', () => onResize());
 
-      if (!scene) {
-        console.error('Model scene not found!');
-        return;
-      }
+      const arToolkitContext = new THREEx.ArToolkitContext({
+        cameraParametersUrl: 'https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/data/camera_para.dat',
+        detectionMode: 'mono_and_matrix',
+        matrixCodeType: '4x4',
+      });
 
-      // Update the raycaster with the camera and mouse position
-      raycaster.setFromCamera(mouse, camera);
+      arToolkitContext.init(() => camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix()));
 
-      // Get all intersected objects
-      const intersects = raycaster.intersectObjects(scene.children, true);
+      scene.visible = false;
 
-      if (intersects.length > 0) {
-        // Get the first intersected object
-        const intersectedObject = intersects[0].object;
+      // Surface tracking (reticle)
+      const geometry = new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2);
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      reticle = new THREE.Mesh(geometry, material);
+      reticle.visible = false;
+      scene.add(reticle);
 
-        // Toggle visibility
-        intersectedObject.visible = !intersectedObject.visible;
+      // Load 3D model
+      const loader = new THREE.GLTFLoader();
+      loader.load('path/to/your/model.glb', (gltf) => {
+        model = gltf.scene;
+        scene.add(model);
 
-        console.log(`Toggled visibility of: ${intersectedObject.name}`);
-      } else {
-        console.log('No object hit.');
-      }
-    });
+        // Animation setup
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach((clip) => {
+          mixer.clipAction(clip).play();
+        });
+        model.visible = false;
+      });
+
+      animate();
+    }
+
+    // Handle AR surface interactions
+    function onSurfaceClick() {
+      if (!model || !reticle.visible) return;
+      model.position.copy(reticle.position);
+      model.visible = true;
+      animationActive = true;
+    }
+
+    function toggleAnimation() {
+      if (!mixer) return;
+      animationActive = !animationActive;
+    }
+
+    // Handle window resize
+    function onResize() {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mixer && animationActive) mixer.update(clock.getDelta());
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('click', onSurfaceClick);
+
+    init();
   </script>
 </body>
 </html>
