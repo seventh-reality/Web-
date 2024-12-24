@@ -52,7 +52,7 @@
     let currentModel = null;
     let animationPlaying = true;
 
-    // Initialize 8th Wall XR scene
+    // Initialize 8th Wall XR scene with App Key
     XR8.addCameraPipelineModules([
       XR8.GlTextureRenderer.pipelineModule(), // For rendering AR content
       XR8.Threejs.pipelineModule(),          // Adds Three.js scene
@@ -100,7 +100,7 @@
 
     // Button Event Listeners
     document.getElementById('startAR').addEventListener('click', () => {
-      XR8.run({ canvas: document.querySelector('canvas') }); // Start 8th Wall AR
+      XR8.run({ canvas: document.querySelector('canvas'), xrConfig: { appKey: '//apps.8thwall.com/xrweb?appKey=XXXXXXXX' } }); // Start 8th Wall AR
     });
 
     document.getElementById('toggleModel').addEventListener('click', addModel);
@@ -117,7 +117,8 @@
       },
     });
 
-    XR8.run();
+    // Initialize the 8th Wall pipeline with your App Key
+    XR8.run({ xrConfig: { appKey: 'YOUR_APP_KEY' } });
   </script>
 </body>
 </html>
