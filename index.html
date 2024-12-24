@@ -42,10 +42,11 @@
 
   <script>
     let scene, camera, renderer, model, mixer, clock, animationActive = false;
-    let reticle;
+    let reticle, arToolkitSource, arToolkitContext;
 
     // Initialize Three.js scene
     function init() {
+      // Scene setup
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -59,27 +60,27 @@
       light.position.set(0, 1, 0);
       scene.add(light);
 
-      // Orbit Controls for debugging (disable in production)
+      // Orbit Controls (for debugging; disable in production)
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.target.set(0, 0, 0);
       controls.update();
 
-      // AR.js markerless SLAM
-      const arToolkitSource = new THREEx.ArToolkitSource({ sourceType: 'webcam' });
+      // AR.js setup for markerless SLAM
+      arToolkitSource = new THREEx.ArToolkitSource({ sourceType: 'webcam' });
       arToolkitSource.init(() => onResize());
       window.addEventListener('resize', () => onResize());
 
-      const arToolkitContext = new THREEx.ArToolkitContext({
+      arToolkitContext = new THREEx.ArToolkitContext({
         cameraParametersUrl: 'https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/data/camera_para.dat',
         detectionMode: 'mono_and_matrix',
         matrixCodeType: '4x4',
       });
 
-      arToolkitContext.init(() => camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix()));
+      arToolkitContext.init(() => {
+        camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+      });
 
-      scene.visible = false;
-
-      // Surface tracking (reticle)
+      // Reticle for surface tracking
       const geometry = new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2);
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       reticle = new THREE.Mesh(geometry, material);
@@ -92,7 +93,7 @@
         model = gltf.scene;
         scene.add(model);
 
-        // Animation setup
+        // Setup animations if present
         mixer = new THREE.AnimationMixer(model);
         gltf.animations.forEach((clip) => {
           mixer.clipAction(clip).play();
@@ -103,7 +104,7 @@
       animate();
     }
 
-    // Handle AR surface interactions
+    // Handle surface click
     function onSurfaceClick() {
       if (!model || !reticle.visible) return;
       model.position.copy(reticle.position);
@@ -111,6 +112,7 @@
       animationActive = true;
     }
 
+    // Toggle animation on/off
     function toggleAnimation() {
       if (!mixer) return;
       animationActive = !animationActive;
@@ -121,17 +123,33 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+
+      if (arToolkitSource && arToolkitSource.onResizeElement) {
+        arToolkitSource.onResizeElement();
+        arToolkitSource.copyElementSizeTo(renderer.domElement);
+        if (arToolkitContext && arToolkitContext.arController) {
+          arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
+        }
+      }
     }
 
     // Animation loop
     function animate() {
       requestAnimationFrame(animate);
+
+      if (arToolkitSource && arToolkitSource.ready) {
+        arToolkitContext.update(arToolkitSource.domElement);
+        scene.visible = camera.visible;
+      }
+
       if (mixer && animationActive) mixer.update(clock.getDelta());
       renderer.render(scene, camera);
     }
 
+    // Event listeners
     window.addEventListener('click', onSurfaceClick);
 
+    // Initialize application
     init();
   </script>
 </body>
