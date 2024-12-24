@@ -6,7 +6,6 @@
   <title>Web AR - Model Viewer</title>
   <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js/three.min.js"></script>
   <style>
     body {
@@ -40,7 +39,9 @@
     <button onclick="toggleAnimation()">Toggle Animation</button>
   </div>
 
-  <script>
+  <script type="module">
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/controls/OrbitControls.js';
+
     let scene, camera, renderer, model, mixer, clock, animationActive = false;
     let surface, reticle;
 
@@ -60,7 +61,7 @@
       scene.add(light);
 
       // Orbit Controls for debugging (disable in production)
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      const controls = new OrbitControls(camera, renderer.domElement);
       controls.target.set(0, 0, 0);
       controls.update();
 
@@ -88,7 +89,7 @@
 
       // Load 3D model
       const loader = new THREE.GLTFLoader();
-      loader.load('Steerad.glb', (gltf) => {
+      loader.load('path/to/your/model.glb', (gltf) => {
         model = gltf.scene;
         scene.add(model);
 
