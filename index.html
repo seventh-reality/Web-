@@ -65,7 +65,8 @@
       document.body.appendChild(renderer.domElement);
 
       // Add AR Button
-      document.body.appendChild(THREE.ARButton.createButton(renderer));
+      const arButton = THREE.ARButton.createButton(renderer);
+      document.body.appendChild(arButton);
 
       // Add Light
       const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
