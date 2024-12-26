@@ -50,8 +50,10 @@
     let animationPlaying = true;
 
     function init() {
+      // Initialize Scene
       scene = new THREE.Scene();
 
+      // Initialize Camera
       camera = new THREE.PerspectiveCamera(
         70,
         window.innerWidth / window.innerHeight,
@@ -59,21 +61,21 @@
         20
       );
 
+      // Initialize Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.xr.enabled = true;
       document.body.appendChild(renderer.domElement);
 
-      // Add AR Button
-      const arButton = THREE.ARButton.createButton(renderer);
-      document.body.appendChild(arButton);
+      // Add ARButton to enable WebXR
+      document.body.appendChild(THREE.ARButton.createButton(renderer));
 
-      // Add Light
+      // Add Light to the Scene
       const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
       light.position.set(0.5, 1, 0.25);
       scene.add(light);
 
-      // Controller for interaction
+      // Add Controller for Interaction
       controller = renderer.xr.getController(0);
       scene.add(controller);
 
@@ -85,12 +87,13 @@
       loader.load(
         'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
         (gltf) => {
+          // Add Loaded Model to Scene
           currentModel = gltf.scene;
           currentModel.scale.set(0.2, 0.2, 0.2);
-          currentModel.position.set(0, 0, -1); // Place 1 meter in front of the user
+          currentModel.position.set(0, 0, -1); // Position 1 meter in front of user
           scene.add(currentModel);
 
-          // Setup Animation
+          // Setup Animation if Available
           if (gltf.animations.length > 0) {
             animationMixer = new THREE.AnimationMixer(currentModel);
             const action = animationMixer.clipAction(gltf.animations[0]);
