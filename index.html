@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web AR Platform</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Web AR Platform with SLAM</title>
+
+    <!-- Load A-Frame Library -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Load AR.js for SLAM -->
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+
     <style>
         body {
             margin: 0;
@@ -35,17 +39,17 @@
 <body>
 
 <!-- AR Scene -->
-<a-scene embedded arjs>
+<a-scene embedded arjs="trackingMethod: best; debugUIEnabled: false;">
     <!-- Light -->
     <a-light type="ambient" intensity="0.8"></a-light>
     <a-light type="point" intensity="1" position="2 4 4"></a-light>
 
-    <!-- Models -->
-    <a-entity id="model1" gltf-model="assets/SC_Kiosk.glb" position="0 0 0" scale="0.5 0.5 0.5" animation-mixer></a-entity>
-    <a-entity id="model2" gltf-model="assets/big_ben.glb" position="0 0 0" scale="0.5 0.5 0.5" visible="false" animation-mixer></a-entity>
-
-    <!-- Clickable Plane for Touch Interaction -->
-    <a-entity geometry="primitive: plane; height: 2; width: 2" position="0 0 -1" material="opacity: 0; transparent: true" id="interaction-plane"></a-entity>
+    <!-- Surface Tracker -->
+    <a-entity id="surface-tracker" arjs-anchor="type: plane;">
+        <!-- Models -->
+        <a-entity id="model1" gltf-model="assets/SC_Kiosk.glb" position="0 0 0" scale="0.5 0.5 0.5" animation-mixer visible="true"></a-entity>
+        <a-entity id="model2" gltf-model="assets/big_ben.glb" position="0 0 0" scale="0.5 0.5 0.5" animation-mixer visible="false"></a-entity>
+    </a-entity>
 </a-scene>
 
 <!-- Canvas Buttons -->
@@ -74,8 +78,8 @@
     }
 
     // Add touch interaction to play animation and voiceover
-    const interactionPlane = document.getElementById('interaction-plane');
-    interactionPlane.addEventListener('click', () => {
+    const sceneEl = document.querySelector('a-scene');
+    sceneEl.addEventListener('click', (e) => {
         const model = document.getElementById(currentModel);
         const voiceover = new Audio(`${currentModel}.mp3`); // Assuming voiceover files are named model1.mp3, model2.mp3
 
