@@ -42,6 +42,8 @@
 
     <!-- Canvas Buttons -->
     <div id="canvas-buttons">
+        <button class="btn" onclick="start3DView()">Start 3D View</button>
+        <button class="btn" onclick="startARView()">Start AR View</button>
         <button class="btn" onclick="switchModel('model1')">Show Model 1</button>
         <button class="btn" onclick="switchModel('model2')">Show Model 2</button>
     </div>
@@ -54,27 +56,21 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('ar-scene').appendChild(renderer.domElement);
 
-        // AR.js setup for SLAM
+        // AR.js setup
         const arToolkitSource = new THREEx.ArToolkitSource({
             sourceType: 'webcam',
         });
-        arToolkitSource.init(() => setTimeout(() => onResize(), 2000));
-
         const arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/three.js/data/camera_para.dat',
             detectionMode: 'mono',
-            maxDetectionRate: 60,
         });
-        arToolkitContext.init(() => camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix()));
 
-        window.addEventListener('resize', onResize);
-        function onResize() {
-            arToolkitSource.onResizeElement();
-            arToolkitSource.copyElementSizeTo(renderer.domElement);
-            if (arToolkitContext.arController !== null) {
-                arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
-            }
-        }
+        // Event listener for resizing
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
 
         // Create light
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -114,17 +110,41 @@
             }
         }
 
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            if (arToolkitSource.ready && arToolkitContext.arController !== null) {
-                arToolkitContext.update(arToolkitSource.domElement);
+        // 3D View Animation Loop
+        function start3DView() {
+            // Stop AR toolkit updates
+            if (arToolkitSource.domElement) {
+                arToolkitSource.domElement.style.display = 'none';
             }
-            renderer.render(scene, camera);
+            function animate() {
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
         }
 
-        // Start animation
-        animate();
+        // AR View Initialization and Loop
+        function startARView() {
+            arToolkitSource.init(() => {
+                arToolkitSource.onResizeElement();
+                arToolkitSource.copyElementSizeTo(renderer.domElement);
+                arToolkitContext.init(() => {
+                    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+                });
+
+                function arLoop() {
+                    if (arToolkitSource.ready && arToolkitContext.arController !== null) {
+                        arToolkitContext.update(arToolkitSource.domElement);
+                    }
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(arLoop);
+                }
+                arLoop();
+            });
+        }
+
+        // Start with 3D view by default
+        start3DView();
     </script>
 </body>
 </html>
