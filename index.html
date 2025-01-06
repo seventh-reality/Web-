@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web AR Platform with SLAM</title>
+    <title>Web AR Platform with Surface Tracking</title>
 
     <!-- Load Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -44,8 +44,6 @@
     <div id="canvas-buttons">
         <button class="btn" onclick="start3DView()">Start 3D View</button>
         <button class="btn" onclick="startARView()">Start AR View</button>
-        <button class="btn" onclick="switchModel('model1')">Show Model 1</button>
-        <button class="btn" onclick="switchModel('model2')">Show Model 2</button>
     </div>
 
     <script>
@@ -65,57 +63,61 @@
             detectionMode: 'mono',
         });
 
-        // Event listener for resizing
+        // Resize event listener
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
         });
 
-        // Create light
+        // Add light to the scene
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0xffffff, 1);
         pointLight.position.set(2, 4, 4);
         scene.add(pointLight);
 
-        // Load Models
+        // Load Model
         const loader = new THREE.GLTFLoader();
-        const models = {};
-        let currentModel = null;
+        let model = null;
 
         loader.load('assets/SC_Kiosk.glb', (gltf) => {
-            models.model1 = gltf.scene;
-            models.model1.scale.set(0.5, 0.5, 0.5);
-            models.model1.visible = true;
-            scene.add(models.model1);
-            currentModel = models.model1;
+            model = gltf.scene;
+            model.scale.set(0.5, 0.5, 0.5);
+            model.visible = false; // Initially hidden
+            scene.add(model);
         });
 
-        loader.load('assets/big_ben.glb', (gltf) => {
-            models.model2 = gltf.scene;
-            models.model2.scale.set(0.5, 0.5, 0.5);
-            models.model2.visible = false;
-            scene.add(models.model2);
-        });
+        // Raycaster for detecting clicks
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
 
-        // Function to switch models
-        function switchModel(modelId) {
-            if (models[modelId]) {
-                for (let key in models) {
-                    models[key].visible = false;
+        // Surface click handler
+        function onSurfaceClick(event) {
+            // Convert mouse position to normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // Update raycaster
+            raycaster.setFromCamera(mouse, camera);
+
+            // Detect intersection
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+
+                // Place model at the clicked position
+                if (model) {
+                    model.visible = true;
+                    model.position.copy(intersect.point);
                 }
-                models[modelId].visible = true;
-                currentModel = models[modelId];
             }
         }
 
         // 3D View Animation Loop
         function start3DView() {
-            // Stop AR toolkit updates
-            if (arToolkitSource.domElement) {
-                arToolkitSource.domElement.style.display = 'none';
-            }
+            renderer.domElement.addEventListener('click', onSurfaceClick);
+
             function animate() {
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
@@ -141,6 +143,8 @@
                 }
                 arLoop();
             });
+
+            renderer.domElement.addEventListener('click', onSurfaceClick);
         }
 
         // Start with 3D view by default
