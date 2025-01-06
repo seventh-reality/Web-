@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web AR Platform with SLAM</title>
 
-    <!-- Load A-Frame Library -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Load AR.js for SLAM -->
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/three.js/build/ar.min.js"></script>
 
     <style>
         body {
@@ -37,59 +37,94 @@
     </style>
 </head>
 <body>
+    <!-- Canvas for Three.js -->
+    <div id="ar-scene"></div>
 
-<!-- AR Scene -->
-<a-scene embedded arjs="trackingMethod: best; debugUIEnabled: false;">
-    <!-- Light -->
-    <a-light type="ambient" intensity="0.8"></a-light>
-    <a-light type="point" intensity="1" position="2 4 4"></a-light>
+    <!-- Canvas Buttons -->
+    <div id="canvas-buttons">
+        <button class="btn" onclick="switchModel('model1')">Show Model 1</button>
+        <button class="btn" onclick="switchModel('model2')">Show Model 2</button>
+    </div>
 
-    <!-- Surface Tracker -->
-    <a-entity id="surface-tracker" arjs-anchor="type: plane;">
-        <!-- Models -->
-        <a-entity id="model1" gltf-model="assets/SC_Kiosk.glb" position="0 0 0" scale="0.5 0.5 0.5" animation-mixer visible="true"></a-entity>
-        <a-entity id="model2" gltf-model="assets/big_ben.glb" position="0 0 0" scale="0.5 0.5 0.5" animation-mixer visible="false"></a-entity>
-    </a-entity>
-</a-scene>
+    <script>
+        // Initialize Three.js scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('ar-scene').appendChild(renderer.domElement);
 
-<!-- Canvas Buttons -->
-<div id="canvas-buttons">
-    <button class="btn" onclick="switchModel('model1')">Show Model 1</button>
-    <button class="btn" onclick="switchModel('model2')">Show Model 2</button>
-</div>
+        // AR.js setup for SLAM
+        const arToolkitSource = new THREEx.ArToolkitSource({
+            sourceType: 'webcam',
+        });
+        arToolkitSource.init(() => setTimeout(() => onResize(), 2000));
 
-<script>
-    let currentModel = 'model1';
+        const arToolkitContext = new THREEx.ArToolkitContext({
+            cameraParametersUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/three.js/data/camera_para.dat',
+            detectionMode: 'mono',
+            maxDetectionRate: 60,
+        });
+        arToolkitContext.init(() => camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix()));
 
-    // Function to switch models
-    function switchModel(modelId) {
-        const model1 = document.getElementById('model1');
-        const model2 = document.getElementById('model2');
-
-        if (modelId === 'model1') {
-            model1.setAttribute('visible', 'true');
-            model2.setAttribute('visible', 'false');
-        } else {
-            model1.setAttribute('visible', 'false');
-            model2.setAttribute('visible', 'true');
+        window.addEventListener('resize', onResize);
+        function onResize() {
+            arToolkitSource.onResizeElement();
+            arToolkitSource.copyElementSizeTo(renderer.domElement);
+            if (arToolkitContext.arController !== null) {
+                arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
+            }
         }
 
-        currentModel = modelId;
-    }
+        // Create light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(2, 4, 4);
+        scene.add(pointLight);
 
-    // Add touch interaction to play animation and voiceover
-    const sceneEl = document.querySelector('a-scene');
-    sceneEl.addEventListener('click', (e) => {
-        const model = document.getElementById(currentModel);
-        const voiceover = new Audio(`${currentModel}.mp3`); // Assuming voiceover files are named model1.mp3, model2.mp3
+        // Load Models
+        const loader = new THREE.GLTFLoader();
+        const models = {};
+        let currentModel = null;
 
-        // Play animation
-        model.setAttribute('animation-mixer', '');
+        loader.load('assets/SC_Kiosk.glb', (gltf) => {
+            models.model1 = gltf.scene;
+            models.model1.scale.set(0.5, 0.5, 0.5);
+            models.model1.visible = true;
+            scene.add(models.model1);
+            currentModel = models.model1;
+        });
 
-        // Play voiceover
-        voiceover.play();
-    });
-</script>
+        loader.load('assets/big_ben.glb', (gltf) => {
+            models.model2 = gltf.scene;
+            models.model2.scale.set(0.5, 0.5, 0.5);
+            models.model2.visible = false;
+            scene.add(models.model2);
+        });
 
+        // Function to switch models
+        function switchModel(modelId) {
+            if (models[modelId]) {
+                for (let key in models) {
+                    models[key].visible = false;
+                }
+                models[modelId].visible = true;
+                currentModel = models[modelId];
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            if (arToolkitSource.ready && arToolkitContext.arController !== null) {
+                arToolkitContext.update(arToolkitSource.domElement);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // Start animation
+        animate();
+    </script>
 </body>
 </html>
