@@ -1,154 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web AR Platform with Surface Tracking</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4DWebsite</title>
+  <style>
+    /* Font Import */
+    @font-face {
+      font-family: 'Jost-Regular';
+      src: url('Jost-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
 
-    <!-- Load Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Load AR.js for SLAM -->
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/three.js/build/ar.min.js"></script>
+    /* General Styles */
+    body {
+      font-family: 'Jost-Regular', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
+    }
+    .logo img {
+    height: 10vh;
+    width: auto;
+    margin-right: 10px;
+    margin-top: 1vh;
+  }
 
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-        #canvas-buttons {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-        .btn {
-            padding: 10px 20px;
-            margin: 0 5px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  @media (min-width: 1024px) {
+    .logo img {
+      height: 8vh;
+      margin-top: 2vh;
+    }
+  }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      /* padding: 10px 30px; */
+      background-color: #f4f4f4;
+      border-bottom: 2px solid #ccc;
+      position: absolute;
+      top: 0;
+      height: 10vh;
+    }
+
+    .menu {
+      font-size: 18px;
+      cursor: pointer;
+      margin-left: 20px;
+    }
+
+    .logo img {
+      height: 12vh;
+      width: auto;
+      margin-right: 10px;
+      margin-top: 2vh;
+    }
+
+    .center-container {
+      flex-direction: column;
+      text-align: center;
+      margin-top: -0px;
+      display: flex;
+      gap: 100px;
+    }
+
+    /* Buttons */
+    .buttons {
+      display: flex;
+      flex-direction: column; /* Stack buttons vertically */
+      justify-content: center;
+      gap: 100px; /* Increased spacing between buttons */
+    }
+
+    .buttons button {
+      padding: 10px 20px;
+      font-size: 25px;
+      color: #c5fffe;
+      border: 2px solid #c5fffe;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: url('button-bg.jpg') no-repeat center center;
+      background-size: cover;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .center-container h1 {
+        font-size: 15px;
+      }
+
+      .buttons button {
+        width: 100%;
+        max-width: 200px;
+      }
+      header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f4f4f4;
+      border-bottom: 2px solid #ccc;
+      position: absolute;
+      top: 0;
+      height: 6vh;
+    }
+    .logo img {
+      height: 8vh;
+      width: auto;
+      margin-right: 10px;
+      margin-top: 1vh;
+    }
+    .buttons button {
+      font-size: 15px;
+    }
+    }
+  </style>  
 </head>
 <body>
-    <!-- Canvas for Three.js -->
-    <div id="ar-scene"></div>
+<header>
+  <div class="menu">☰</div>
+  <div class="logo">
+  <img src="logo-dark.png" alt="Logo" class="logo">
+</div>
+</header>
 
-    <!-- Canvas Buttons -->
-    <div id="canvas-buttons">
-        <button class="btn" onclick="start3DView()">Start 3D View</button>
-        <button class="btn" onclick="startARView()">Start AR View</button>
+<main class="content">
+  <div class="center-container">
+    <div class="buttons">
+      <button onclick="navigateTo('Largeequipment.html')">LARGE EQUIPMENT</button>
+      <button onclick="navigateTo('Mediumdevices.html')">MEDIUM DEVICES</button>
+      <button onclick="navigateTo('SmallDevices.html')">SMALL DEVICES</button>
+      <button onclick="navigateTo('Booth.html')">EVENT BOOTH</button>  
     </div>
+  </div>
+</main>
 
-    <script>
-        // Initialize Three.js scene, camera, and renderer
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('ar-scene').appendChild(renderer.domElement);
+<script>
+  // JavaScript function to navigate to a new page
+  function navigateTo(page) {
+    window.location.href = page;
+  }
+</script>
 
-        // AR.js setup
-        const arToolkitSource = new THREEx.ArToolkitSource({
-            sourceType: 'webcam',
-        });
-        const arToolkitContext = new THREEx.ArToolkitContext({
-            cameraParametersUrl: 'https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/three.js/data/camera_para.dat',
-            detectionMode: 'mono',
-        });
-
-        // Resize event listener
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        });
-
-        // Add light to the scene
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 1);
-        pointLight.position.set(2, 4, 4);
-        scene.add(pointLight);
-
-        // Load Model
-        const loader = new THREE.GLTFLoader();
-        let model = null;
-
-        loader.load('assets/SC_Kiosk.glb', (gltf) => {
-            model = gltf.scene;
-            model.scale.set(0.5, 0.5, 0.5);
-            model.visible = false; // Initially hidden
-            scene.add(model);
-        });
-
-        // Raycaster for detecting clicks
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        // Surface click handler
-        function onSurfaceClick(event) {
-            // Convert mouse position to normalized device coordinates
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            // Update raycaster
-            raycaster.setFromCamera(mouse, camera);
-
-            // Detect intersection
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            if (intersects.length > 0) {
-                const intersect = intersects[0];
-
-                // Place model at the clicked position
-                if (model) {
-                    model.visible = true;
-                    model.position.copy(intersect.point);
-                }
-            }
-        }
-
-        // 3D View Animation Loop
-        function start3DView() {
-            renderer.domElement.addEventListener('click', onSurfaceClick);
-
-            function animate() {
-                renderer.render(scene, camera);
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
-
-        // AR View Initialization and Loop
-        function startARView() {
-            arToolkitSource.init(() => {
-                arToolkitSource.onResizeElement();
-                arToolkitSource.copyElementSizeTo(renderer.domElement);
-                arToolkitContext.init(() => {
-                    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-                });
-
-                function arLoop() {
-                    if (arToolkitSource.ready && arToolkitContext.arController !== null) {
-                        arToolkitContext.update(arToolkitSource.domElement);
-                    }
-                    renderer.render(scene, camera);
-                    requestAnimationFrame(arLoop);
-                }
-                arLoop();
-            });
-
-            renderer.domElement.addEventListener('click', onSurfaceClick);
-        }
-
-        // Start with 3D view by default
-        start3DView();
-    </script>
 </body>
 </html>
