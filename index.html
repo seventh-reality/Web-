@@ -4,8 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>4DWebsite</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
-    /* Font Import */
+    /* Add Jost-Regular font */
     @font-face {
       font-family: 'Jost-Regular';
       src: url('Jost-Regular.ttf') format('truetype');
@@ -13,149 +17,199 @@
       font-style: normal;
     }
 
-    /* General Styles */
+    /* Basic styling */
     body {
-      font-family: 'Jost-Regular', Arial, sans-serif;
+      font-family: 'Jost-Regular', 'Jost', sans-serif;
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: #000000;
     }
-    .logo img {
-    height: 10vh;
-    width: auto;
-    margin-right: 10px;
-    margin-top: 1vh;
-  }
-
-  @media (min-width: 1024px) {
-    .logo img {
-      height: 8vh;
-      margin-top: 2vh;
-    }
-  }
 
     header {
-      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      /* padding: 10px 30px; */
-      background-color: #f4f4f4;
-      border-bottom: 2px solid #ccc;
-      position: absolute;
-      top: 0;
-      height: 10vh;
+      padding: 10px 20px;
+      background: #333;
+      color: #fff;
+      font-family: 'Jost-Regular', sans-serif;
     }
 
-    .menu {
-      font-size: 18px;
+    header .menu {
+      font-size: 24px;
       cursor: pointer;
-      margin-left: 20px;
     }
 
-    .logo img {
-      height: 12vh;
-      width: auto;
-      margin-right: 10px;
-      margin-top: 2vh;
+    header .logo img {
+      height: 40px;
     }
 
     .center-container {
-      flex-direction: column;
       text-align: center;
-      margin-top: -0px;
-      display: flex;
-      gap: 100px;
+      margin-top: 100px;
     }
 
-    /* Buttons */
-    .buttons {
-      display: flex;
-      flex-direction: column; /* Stack buttons vertically */
-      justify-content: center;
-      gap: 100px; /* Increased spacing between buttons */
+    .center-container h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-family: 'Jost-Regular', sans-serif;
     }
 
-    .buttons button {
-      padding: 10px 20px;
-      font-size: 25px;
-      color: #c5fffe;
-      border: 2px solid #c5fffe;
+    .portfolio {
+      display: grid;
+      transform: translateY(15%);
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .portfolio-item {
+      background: #f9f9f9;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .portfolio-image {
+      position: relative;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button#ar-button {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 16px;
+      background-color: #ffffff78;
+      color: #020202;
+      border: none;
+      padding: 10px 16px;
       border-radius: 5px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      background: url('button-bg.jpg') no-repeat center center;
-      background-size: cover;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      line-height: 1.5;
+      font-family: 'Jost-Regular', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .buttons button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    button#ar-button:hover {
+      background-color: #e8e8e8;
+    }
+
+    .progress-bar {
+      display: block;
+      width: 33%;
+      height: 10%;
+      max-height: 2%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      border-radius: 25px;
+      box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-bar.hide {
+      visibility: hidden;
+      transition: visibility 0.3s;
+    }
+
+    .update-bar {
+      background-color: rgba(255, 255, 255, 0.9);
+      width: 0%;
+      height: 100%;
+      border-radius: 25px;
+      float: left;
+      transition: width 0.3s;
     }
 
     @media (max-width: 768px) {
-      .center-container h1 {
-        font-size: 15px;
+      .portfolio {
+        transform: translateY(10%);
       }
-
-      .buttons button {
-        width: 100%;
-        max-width: 200px;
-      }
-      header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #f4f4f4;
-      border-bottom: 2px solid #ccc;
-      position: absolute;
-      top: 0;
-      height: 6vh;
     }
-    .logo img {
-      height: 8vh;
-      width: auto;
-      margin-right: 10px;
-      margin-top: 1vh;
-    }
-    .buttons button {
-      font-size: 15px;
-    }
-    }
-  </style>  
+  </style>
 </head>
 <body>
+
 <header>
   <div class="menu">☰</div>
   <div class="logo">
-  <img src="logo-dark.png" alt="Logo" class="logo">
-</div>
+    <img src="logo-dark.png" alt="Logo">
+  </div>
 </header>
 
 <main class="content">
   <div class="center-container">
-    <div class="buttons">
-      <button onclick="navigateTo('Largeequipment.html')">LARGE EQUIPMENT</button>
-      <button onclick="navigateTo('Mediumdevices.html')">MEDIUM DEVICES</button>
-      <button onclick="navigateTo('SmallDevices.html')">SMALL DEVICES</button>
-      <button onclick="navigateTo('Booth.html')">EVENT BOOTH</button>  
-    </div>
+    <h1>LARGE EQUIPMENT</h1>
   </div>
 </main>
 
+<div class="portfolio">
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="Steeradtext.glb" alt="VR Headset" auto-rotate camera-controls ar>
+        <div class="progress-bar hide" slot="progress-bar">
+          <div class="update-bar"></div>
+        </div>
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="sem.glb" alt="AR SCANNER" auto-rotate camera-controls ar ios-src="assets/CT_SCANNER_A.usdz">
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="Bed.glb" alt="AR SCANNER" auto-rotate camera-controls ar>
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="iitpl.glb" alt="AR SCANNER" auto-rotate camera-controls ar>
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="VITAL SIGNS MONITOR (1).glb" alt="AR SCANNER" auto-rotate camera-controls ar>
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+  <article class="portfolio-item">
+    <div class="portfolio-image">
+      <model-viewer src="MAMMOGRAPHY.glb" alt="AR SCANNER" auto-rotate camera-controls ar>
+        <button slot="ar-button" id="ar-button">View in 4D</button>
+      </model-viewer>
+    </div>
+  </article>
+</div>
+
 <script>
-  // JavaScript function to navigate to a new page
-  function navigateTo(page) {
-    window.location.href = page;
-  }
+  // Additional JS logic (if needed) can go here
 </script>
 
 </body>
